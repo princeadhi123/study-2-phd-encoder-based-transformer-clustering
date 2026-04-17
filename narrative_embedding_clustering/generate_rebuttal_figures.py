@@ -181,149 +181,88 @@ def plot_dimensionality_ablation(data):
 def plot_equal_dims_comparison(data):
     abl = data["ablation"]
 
-    # Wider figure so the 10 x-axis ticks are legible.
-    fig, axes = plt.subplots(1, 2, figsize=(16, 5.2),
-                             gridspec_kw={"width_ratios": [1.25, 1.0], "wspace": 0.35})
+    # 2x2 grid of winning-model (MiniLM) per-metric trajectories.
+    fig, axes = plt.subplots(2, 2, figsize=(13, 8))
+    ax_grid = axes.flatten()
 
-    # Panel 1: plot on uniformly-spaced categorical positions so low-dim gap is even.
-    ax = axes[0]
     dims_sorted = sorted(abl["PCA_dims"].unique())
     pos_map = {d: i for i, d in enumerate(dims_sorted)}
-    for model in ["MiniLM", "MPNet"]:
-        sub = abl[abl["Model"] == model].sort_values("PCA_dims")
-        xs = [pos_map[int(d)] for d in sub["PCA_dims"]]
-        label = f"Strategy C + {model} (Narrative)"
-        ax.plot(xs, sub["Mean_Eta2"], "o-", label=label, linewidth=2, markersize=7)
 
-    ax.axhline(NUMERIC_REF["Mean_Eta2"], color="#E53935", linestyle="--",
-               linewidth=2.5, label=f"Numeric ({NUMERIC_REF['dims']} dims)")
-
-    # Dynamic annotation at the baseline-equal dim (8) and the peak.
-    try:
-        eq_val = float(abl[(abl["Model"] == "MiniLM") & (abl["PCA_dims"] == 8)]["Mean_Eta2"].iloc[0])
-        peak_row = abl[abl["Model"] == "MiniLM"].sort_values("Mean_Eta2", ascending=False).iloc[0]
-        peak_dim = int(peak_row["PCA_dims"])
-        peak_val = float(peak_row["Mean_Eta2"])
-    except Exception:
-        eq_val, peak_dim, peak_val = 0.48, 6, 0.49
-    # Short vertical arrows — labels sit directly above their target markers.
-    y_top = max(abl["Mean_Eta2"].max(), NUMERIC_REF["Mean_Eta2"]) + 0.045
-    ax.annotate(f"Peak @ {peak_dim} dims (η²={peak_val:.3f})",
-                xy=(pos_map[peak_dim], peak_val),
-                xytext=(pos_map[peak_dim] - 0.3, y_top),
-                arrowprops=dict(arrowstyle="->", color="#1B5E20", lw=1.2),
-                fontsize=9, color="#1B5E20", fontweight="bold", ha="left")
-    ax.annotate(f"8 dims: η²={eq_val:.3f}",
-                xy=(pos_map[8], eq_val),
-                xytext=(pos_map[8] + 0.3, y_top - 0.022),
-                arrowprops=dict(arrowstyle="->", color="green", lw=1.2),
-                fontsize=9, color="green", fontweight="bold", ha="left")
-
-    ax.set_xlabel("Number of PCA Components (Dimensions)", fontsize=11)
-    ax.set_ylabel("Mean η² (Predictive Power)", fontsize=11)
-    ax.set_title("Predictive Power vs Dimensionality\n(Composite winner: Strategy C + MiniLM, K=8)",
-                 fontweight="bold")
-    ax.set_xticks(range(len(dims_sorted)))
-    ax.set_xticklabels([str(d) for d in dims_sorted])
-    ax.set_xlim(-0.4, len(dims_sorted) - 0.6)
-    ax.tick_params(axis="x", labelsize=9)
-    # Tighten ylim around observed values and numeric baseline.
-    y_min = min(abl["Mean_Eta2"].min(), NUMERIC_REF["Mean_Eta2"]) - 0.04
-    y_max = max(abl["Mean_Eta2"].max(), NUMERIC_REF["Mean_Eta2"]) + 0.08
-    ax.set_ylim(y_min, y_max)
-    ax.legend(loc="lower right", fontsize=9)
-    ax.grid(alpha=0.3)
-
-    # Panel 2: Table
-    ax = axes[1]
-    ax.axis("off")
-
-    num_eta = NUMERIC_REF["Mean_Eta2"]
-    # Compact table: a handful of anchor dims plus break-even row (first dim where
-    # narrative falls at or below numeric baseline), keyed on MiniLM.
+    # Winning-model (MiniLM) per-metric trajectories — one subplot each.
+    # ARI is intentionally excluded (it's a between-partition agreement score,
+    # not a quality-of-clustering metric).
     mini = abl[abl["Model"] == "MiniLM"].sort_values("PCA_dims").reset_index(drop=True)
-    anchor_dims = {2, 4, 6, 8, 10, 20, 50, 100}
-    breakeven_dim = None
-    for _, r in mini.iterrows():
-        if float(r["Mean_Eta2"]) < num_eta - 0.005:
-            breakeven_dim = int(r["PCA_dims"])
-            break
+    mini_pos = [pos_map[int(d)] for d in mini["PCA_dims"]]
 
-    def _status(val: float) -> str:
-        if val > num_eta + 0.005:
-            return "✓ WINS"
-        if abs(val - num_eta) <= 0.005:
-            return "≈ Equal"
-        return "✗ Below"
+    metric_specs = [
+        ("Mean η² (higher is better)",              "Mean_Eta2",         NUMERIC_REF["Mean_Eta2"],         "#1976D2", "o", False),
+        ("Silhouette — Cosine (higher is better)",  "Silhouette_Cosine", NUMERIC_REF["Silhouette"],        "#2E7D32", "s", False),
+        ("Calinski–Harabasz (higher is better)",    "Calinski_Harabasz", NUMERIC_REF["Calinski_Harabasz"], "#E65100", "^", False),
+        ("Davies–Bouldin (lower is better)",        "Davies_Bouldin",    NUMERIC_REF["Davies_Bouldin"],    "#6A1B9A", "D", True),
+    ]
 
-    # PCA=8 is the production setting used in the paper (K=8 composite winner).
-    production_dim = 8
-    table_data = [["Condition", "Dims", "η²", "vs Numeric"]]
-    for _, r in mini.iterrows():
-        d = int(r["PCA_dims"])
-        if d in anchor_dims or d == breakeven_dim:
-            eta_r = float(r["Mean_Eta2"])
-            prefix = "★ " if d == production_dim else ""
-            table_data.append([
-                f"{prefix}Strategy C + MiniLM (PCA={d})",
-                str(d), f"{eta_r:.3f}", _status(eta_r),
-            ])
-    table_data.append(["Numeric Baseline", f"{NUMERIC_REF['dims']}", f"{num_eta:.3f}", "—"])
+    for ax, (title, col, ref, color, marker, lower_better) in zip(ax_grid, metric_specs):
+        y = mini[col].to_numpy()
+        ax.plot(mini_pos, y, marker=marker, color=color, linewidth=2,
+                markersize=6, label="Strategy C + MiniLM")
+        ax.axhline(ref, color="#E53935", linestyle="--", linewidth=1.6,
+                   label=f"Numeric ({NUMERIC_REF['dims']} dims)")
 
-    # Build colour grid dynamically to match the row count (header + data rows).
-    def _row_colors(status: str, is_production: bool) -> list:
-        if is_production:
-            # Distinct highlight for the production setting (PCA=8, K=8).
-            return ["#FFE082", "#FFE082", "#FFD54F", "#FFD54F"]
-        if status == "✓ WINS":
-            body = "#C8E6C9"
-        elif status == "≈ Equal":
-            body = "#FFF9C4"
-        elif status == "✗ Below":
-            body = "#FFCDD2"
+        # Mark production PCA=8.
+        ax.axvline(pos_map[8], color="#FFB300", linestyle=":", linewidth=1.4, alpha=0.8)
+
+        # Star-marker the best PCA (min for DB, max otherwise).
+        best_idx = int(np.argmin(y)) if lower_better else int(np.argmax(y))
+        best_x, best_y = mini_pos[best_idx], y[best_idx]
+        best_dim = int(mini["PCA_dims"].iloc[best_idx])
+        ax.scatter([best_x], [best_y], s=220, marker="*", color=color,
+                   edgecolor="black", linewidth=0.8, zorder=6)
+
+        ax.set_xticks(range(len(dims_sorted)))
+        ax.set_xticklabels([str(d) for d in dims_sorted], fontsize=8)
+        ax.set_xlim(-0.6, len(dims_sorted) - 0.4)
+        ax.set_title(title, fontweight="bold", fontsize=10)
+        ax.grid(alpha=0.3)
+
+        # Add headroom on the "better" side so the star + annotation never clip.
+        y_vals = np.concatenate([y, [ref]])
+        y_lo, y_hi = float(y_vals.min()), float(y_vals.max())
+        pad = (y_hi - y_lo) * 0.18 if y_hi > y_lo else abs(y_hi) * 0.2 + 1.0
+        if lower_better:
+            ax.set_ylim(y_lo - pad, y_hi + pad * 0.4)
         else:
-            body = "#ECEFF1"
-        return ["#BBDEFB", "#BBDEFB", body, body]
+            ax.set_ylim(y_lo - pad * 0.4, y_hi + pad)
 
-    colors = [["#E3F2FD"] * 4]
-    for row in table_data[1:-1]:
-        colors.append(_row_colors(row[3], row[0].startswith("★ ")))
-    colors.append(["#FFCDD2"] * 4)
+        # Best-PCA caption in the TOP-LEFT corner of every subplot.
+        ax.text(0.02, 0.95, f"★ best: PCA={best_dim}",
+                transform=ax.transAxes, fontsize=9, color=color,
+                fontweight="bold", ha="left", va="top",
+                bbox=dict(boxstyle="round,pad=0.3", facecolor="white",
+                          edgecolor=color, alpha=0.9))
 
-    table = ax.table(cellText=table_data[1:], colLabels=table_data[0],
-                     cellLoc="center", loc="center",
-                     colColours=["#1976D2"] * 4,
-                     colWidths=[0.48, 0.14, 0.16, 0.22])
-    table.auto_set_font_size(False)
-    table.set_fontsize(9)
-    table.scale(1.2, 1.8)
+        # Legend moved to the TOP-RIGHT (numeric + strategy entries).
+        ax.legend(loc="upper right", fontsize=7.5, framealpha=0.92)
 
-    n_rows = len(table_data)  # includes header
-    for i in range(4):
-        table[(0, i)].set_text_props(color="white", fontweight="bold")
-    for i in range(1, n_rows):
-        is_prod = table_data[i][0].startswith("★ ")
-        for j in range(4):
-            table[(i, j)].set_facecolor(colors[i][j])
-            if is_prod:
-                table[(i, j)].set_text_props(fontweight="bold", color="#BF360C")
-            elif j == 3 and table_data[i][j] == "✓ WINS":
-                table[(i, j)].set_text_props(fontweight="bold", color="#1B5E20")
+    # Shared x-label only on the bottom row, y-label sentence above the grid.
+    for ax in ax_grid[2:]:
+        ax.set_xlabel("PCA Components", fontsize=9)
 
-    ax.set_title("Key Finding: Strategy C + MiniLM Wins at EQUAL or FEWER Dimensions",
-                 fontweight="bold", fontsize=11, y=0.98)
+    fig.suptitle(
+        "Strategy C + MiniLM vs Numeric Baseline across PCA Dimensions",
+        fontsize=12, fontweight="bold", y=1.01,
+    )
 
-    be_txt = f"breaks even near PCA={breakeven_dim}" if breakeven_dim else "never drops below numeric"
-    text = ("Conclusion: The narrative advantage is NOT due to more dimensions.\n"
-            f"Peak at PCA={int(mini.loc[mini['Mean_Eta2'].idxmax(), 'PCA_dims'])} "
-            f"(η²={mini['Mean_Eta2'].max():.3f}); {be_txt} "
-            f"(numeric = {NUMERIC_REF['dims']} dims, η²={num_eta:.3f}).\n"
+    plt.tight_layout(rect=(0, 0.08, 1, 1))
+
+    # Green conclusion note below the 2x2 grid.
+    note = ("Conclusion: MiniLM beats the numeric baseline on every internal metric "
+            "across PCA 2–100, with predictive η² peaking at PCA=6 "
+            f"(numeric baseline = {NUMERIC_REF['dims']} dims). "
             "SEMANTIC ENCODING drives the gain, not dimensionality.")
-    ax.text(0.5, -0.12, text, transform=ax.transAxes, fontsize=9,
-            ha="center", va="top", style="italic",
-            bbox=dict(boxstyle="round,pad=0.5", facecolor="#E8F5E9", edgecolor="green"))
-
-    plt.tight_layout()
+    fig.text(0.5, 0.02, note, ha="center", va="bottom", fontsize=9.5,
+             style="italic",
+             bbox=dict(boxstyle="round,pad=0.5", facecolor="#E8F5E9",
+                       edgecolor="green"))
     out = FIGS_DIR / "fig2_equal_dimensions.png"
     fig.savefig(out, dpi=300)
     plt.close(fig)

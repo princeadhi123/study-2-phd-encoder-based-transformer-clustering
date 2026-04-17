@@ -3,9 +3,9 @@ Reviewer Ablation & Validity Study
 ====================================
 All reviewer-response analyses in one script:
 
-Part 1:  DIMENSIONALITY CONFOUND — PCA = {8, 11, 20} ablation
-Part 2:  GRANULARITY JUSTIFICATION — K=9 vs K=4 eta-squared & Cohen's d
-Part 2b: INCREMENTAL VALIDITY — hierarchical tier structure of K=9
+Part 1:  DIMENSIONALITY CONFOUND — PCA sweep {2,4,6,8,10,15,20,30,50,100} to locate break-even vs 8-D numeric
+Part 2:  GRANULARITY JUSTIFICATION — narrative vs numeric (K auto-selected by AICc)
+Part 2b: INCREMENTAL VALIDITY — hierarchical tier structure of narrative clusters
 Part 3:  DECISION-WEIGHT SENSITIVITY — composite weight sweep
 Part 4:  ANOVA CONFOUND CHECK — within-subject Kruskal-Wallis tests
 Part 5:  PREDICTIVE VALIDITY — 5-fold CV grade prediction from clusters
@@ -170,7 +170,9 @@ def run_dimensionality_ablation():
     subj_cols = sorted([c for c in marks_df.columns if c.startswith("S") and c[1:].isdigit()])
     numeric_clusters = pd.read_csv(STUDENT_CLUSTERS_PATH)
 
-    pca_dims = [8, 11, 20]
+    # Sweep a wide dim range (very low -> very high) to expose break-even
+    # vs. the numeric baseline (8 dims).
+    pca_dims = [2, 4, 6, 8, 10, 15, 20, 30, 50, 100]
     all_results = []
 
     for model_name, model_dir in STRATEGY_C_MODELS.items():
@@ -267,7 +269,7 @@ def run_dimensionality_ablation():
 
 
 # ══════════════════════════════════════════════════════════════════════════
-# PART 2: Granularity justification (K=9 narrative vs K=4 numeric)
+# PART 2: Granularity justification (narrative vs numeric; K auto-selected by AICc, range 2-10)
 # ══════════════════════════════════════════════════════════════════════════
 
 def run_granularity_analysis():
@@ -312,7 +314,7 @@ def run_granularity_analysis():
     eta_df.to_csv(RESULTS_DIR / "granularity_eta_comparison.csv", index=False)
 
     # 2b. Pairwise Cohen's d between narrative clusters on each subject
-    # This shows K=9 captures meaningful sub-group differences
+    # This shows narrative K captures meaningful sub-group differences
     print("\n--- Pairwise Cohen's d Between Narrative Clusters ---")
     cluster_labels = sorted(merged["narrative_gmm_aicc_best_label"].unique())
 
@@ -378,13 +380,13 @@ def run_granularity_analysis():
 
 
 # ══════════════════════════════════════════════════════════════════════════
-# PART 2b: Incremental Validity Analysis (K=9 vs K=4 hierarchical structure)
+# PART 2b: Incremental Validity Analysis (narrative vs numeric hierarchical structure)
 # ══════════════════════════════════════════════════════════════════════════
 
 def run_incremental_validity_analysis():
-    """Extended granularity analysis: Does K=9 provide new info beyond K=4?"""
+    """Extended granularity analysis: Does narrative K provide new info beyond numeric K?"""
     print("\n" + "=" * 70)
-    print("PART 2b: INCREMENTAL VALIDITY ANALYSIS (K=9 Hierarchical Structure)")
+    print("PART 2b: INCREMENTAL VALIDITY ANALYSIS (Narrative Hierarchical Structure)")
     print("=" * 70)
 
     profiles = pd.read_csv(RESULTS_DIR / "granularity_cluster_mean_profiles.csv")
@@ -392,7 +394,7 @@ def run_incremental_validity_analysis():
     subj_cols = [c for c in profiles.columns if c.startswith("S")]
 
     # 1. Identify macro-regions by S2 performance
-    print("\n1. MACRO-REGION STRUCTURE (K=9 → 3 Tiers)")
+    print("\n1. MACRO-REGION STRUCTURE (Narrative K → 3 Tiers)")
     print("-" * 50)
 
     def get_tier(score):
@@ -511,12 +513,12 @@ def run_incremental_validity_analysis():
     print("INCREMENTAL VALIDITY SUMMARY")
     print("=" * 70)
     print("""
-K=9 reveals hierarchical structure:
-  1. MACRO-LEVEL (3 tiers): High/Medium/Low — comparable to K=4
-  2. MESO-LEVEL (9 clusters): Educationally distinct sub-types within tiers
+Narrative clustering reveals hierarchical structure:
+  1. MACRO-LEVEL (3 tiers): High/Medium/Low — comparable to numeric baseline
+  2. MESO-LEVEL (narrative K clusters): Educationally distinct sub-types within tiers
      - HIGH tier splits into: Consistent, STEM-focused, Verbal-focused achievers
-     - Within-high-tier: 50% of pairs show large effects (|d|>=0.8)
-  3. EDUCATIONAL UTILITY: K=9 enables targeted interventions
+     - Within-high-tier: multiple pairs show large effects (|d|>=0.8)
+  3. EDUCATIONAL UTILITY: fine-grained narrative K enables targeted interventions
      - "STEM-focused" → Different support than "Verbal-focused"
      - "Partially competent" → Build on strength vs intensive remediation
 
@@ -823,7 +825,7 @@ def run_representational_validity():
 
     # PCA-reduced embedding correlation
     print(f"\n--- PCA-Reduced Embedding Correlation ---")
-    for n_comp in [8, 11, 20]:
+    for n_comp in [2, 4, 6, 8, 10, 15, 20, 30, 50, 100]:
         pca = PCA(n_components=n_comp, random_state=42)
         X_pca = pca.fit_transform(X_emb_aligned)
         pca_dists = pdist(X_pca, metric="euclidean")
@@ -855,7 +857,7 @@ def main():
     # Part 2: Granularity justification
     eta_df = run_granularity_analysis()
 
-    # Part 2b: Incremental validity (K=9 hierarchical structure)
+    # Part 2b: Incremental validity (narrative hierarchical structure)
     run_incremental_validity_analysis()
 
     # Part 3: Weight sensitivity

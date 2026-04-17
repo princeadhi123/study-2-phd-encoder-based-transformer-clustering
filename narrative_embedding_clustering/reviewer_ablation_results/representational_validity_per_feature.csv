@@ -1,0 +1,9 @@
+Feature,Spearman_rho,p_value,Significant
+n_items,,,False
+accuracy,0.6606270615448453,0.0,True
+avg_rt,0.235112859312363,0.0,True
+var_rt,0.1034318124018179,0.0,True
+rt_cv,0.03160398039556189,3.901132871362526e-33,True
+longest_correct_streak,0.3294204393221426,0.0,True
+longest_incorrect_streak,0.40438185426994455,0.0,True
+consecutive_correct_rate,0.6585186477857428,0.0,True

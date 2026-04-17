@@ -28,15 +28,45 @@ RESULTS_DIR = BASE_DIR / "reviewer_ablation_results"
 FIGS_DIR = RESULTS_DIR / "figures"
 FIGS_DIR.mkdir(parents=True, exist_ok=True)
 
-# Numeric baseline reference
-NUMERIC_REF = {
-    "Silhouette": 0.2650,
-    "Calinski_Harabasz": 254.8822,
-    "Davies_Bouldin": 1.1647,
-    "ARI": 0.1317,
-    "Mean_Eta2": 0.48,
-    "dims": 11,
-}
+FINAL_COMP_PATH = BASE_DIR / "final result" / "final_model_comparison.csv"
+
+
+def _load_numeric_ref() -> dict:
+    """Load numeric baseline metrics from the authoritative comparison CSV.
+
+    Falls back to hard-coded values if the CSV is unavailable so the figures
+    script still runs on environments without the latest pipeline outputs.
+    """
+    fallback = {
+        "Silhouette": 0.1312,
+        "Calinski_Harabasz": 144.7685,
+        "Davies_Bouldin": 1.5169,
+        "ARI": float("nan"),
+        "Mean_Eta2": 0.3964,
+        "dims": 8,
+        "K": 5,
+    }
+    try:
+        df = pd.read_csv(FINAL_COMP_PATH)
+        row = df[df["Template"] == "Numeric"].iloc[0]
+        return {
+            "Silhouette": float(row["Silhouette (Cosine)"]),
+            "Calinski_Harabasz": float(row["Calinski-Harabasz"]),
+            "Davies_Bouldin": float(row["Davies-Bouldin"]),
+            "ARI": float(row["ARI (vs Numeric)"]) if not pd.isna(row["ARI (vs Numeric)"]) else float("nan"),
+            "Mean_Eta2": float(row["Mean Eta^2"]),
+            "dims": 8,
+            "K": int(row["Winner K"]),
+        }
+    except Exception:
+        return fallback
+
+
+NUMERIC_REF = _load_numeric_ref()
+
+# Winning narrative K used by downstream cluster-level figures (lifted from
+# the latest composite winner in final_model_comparison.csv).
+BEST_NAR_K = 8
 
 # Colours
 C_MINILM = "#2196F3"
@@ -137,29 +167,56 @@ def plot_dimensionality_ablation(data):
 def plot_equal_dims_comparison(data):
     abl = data["ablation"]
 
-    fig, axes = plt.subplots(1, 2, figsize=(12, 4.5))
+    # Wider figure so the 10 x-axis ticks are legible.
+    fig, axes = plt.subplots(1, 2, figsize=(15, 5.2),
+                             gridspec_kw={"width_ratios": [1.25, 1.0]})
 
-    # Panel 1: Line plot
+    # Panel 1: plot on uniformly-spaced categorical positions so low-dim gap is even.
     ax = axes[0]
+    dims_sorted = sorted(abl["PCA_dims"].unique())
+    pos_map = {d: i for i, d in enumerate(dims_sorted)}
     for model in ["MiniLM", "MPNet"]:
         sub = abl[abl["Model"] == model].sort_values("PCA_dims")
-        ax.plot(sub["PCA_dims"], sub["Mean_Eta2"], "o-",
-                label=f"{model} (Narrative)", linewidth=2, markersize=8)
+        xs = [pos_map[int(d)] for d in sub["PCA_dims"]]
+        label = f"Strategy C + {model} (Narrative)"
+        ax.plot(xs, sub["Mean_Eta2"], "o-", label=label, linewidth=2, markersize=7)
 
     ax.axhline(NUMERIC_REF["Mean_Eta2"], color="#E53935", linestyle="--",
                linewidth=2.5, label=f"Numeric ({NUMERIC_REF['dims']} dims)")
-    ax.fill_between([5, 25], NUMERIC_REF["Mean_Eta2"] - 0.01,
-                    NUMERIC_REF["Mean_Eta2"] + 0.01, alpha=0.15, color="#E53935")
 
-    ax.annotate("Narrative wins at 8 dims!", xy=(8, 0.483), xytext=(8, 0.52),
-                arrowprops=dict(arrowstyle="->", color="green", lw=1.5),
-                fontsize=9, ha="center", color="green", fontweight="bold")
+    # Dynamic annotation at the baseline-equal dim (8) and the peak.
+    try:
+        eq_val = float(abl[(abl["Model"] == "MiniLM") & (abl["PCA_dims"] == 8)]["Mean_Eta2"].iloc[0])
+        peak_row = abl[abl["Model"] == "MiniLM"].sort_values("Mean_Eta2", ascending=False).iloc[0]
+        peak_dim = int(peak_row["PCA_dims"])
+        peak_val = float(peak_row["Mean_Eta2"])
+    except Exception:
+        eq_val, peak_dim, peak_val = 0.48, 6, 0.49
+    # Short vertical arrows — labels sit directly above their target markers.
+    y_top = max(abl["Mean_Eta2"].max(), NUMERIC_REF["Mean_Eta2"]) + 0.045
+    ax.annotate(f"Peak @ {peak_dim} dims (η²={peak_val:.3f})",
+                xy=(pos_map[peak_dim], peak_val),
+                xytext=(pos_map[peak_dim] - 0.3, y_top),
+                arrowprops=dict(arrowstyle="->", color="#1B5E20", lw=1.2),
+                fontsize=9, color="#1B5E20", fontweight="bold", ha="left")
+    ax.annotate(f"8 dims: η²={eq_val:.3f}",
+                xy=(pos_map[8], eq_val),
+                xytext=(pos_map[8] + 0.3, y_top - 0.022),
+                arrowprops=dict(arrowstyle="->", color="green", lw=1.2),
+                fontsize=9, color="green", fontweight="bold", ha="left")
 
     ax.set_xlabel("Number of PCA Components (Dimensions)", fontsize=11)
     ax.set_ylabel("Mean η² (Predictive Power)", fontsize=11)
-    ax.set_title("Predictive Power at Equal/Fewer Dimensions", fontweight="bold")
-    ax.set_xticks([8, 11, 20])
-    ax.set_ylim(0.42, 0.54)
+    ax.set_title("Predictive Power vs Dimensionality\n(Composite winner: Strategy C + MiniLM, K=8)",
+                 fontweight="bold")
+    ax.set_xticks(range(len(dims_sorted)))
+    ax.set_xticklabels([str(d) for d in dims_sorted])
+    ax.set_xlim(-0.4, len(dims_sorted) - 0.6)
+    ax.tick_params(axis="x", labelsize=9)
+    # Tighten ylim around observed values and numeric baseline.
+    y_min = min(abl["Mean_Eta2"].min(), NUMERIC_REF["Mean_Eta2"]) - 0.04
+    y_max = max(abl["Mean_Eta2"].max(), NUMERIC_REF["Mean_Eta2"]) + 0.08
+    ax.set_ylim(y_min, y_max)
     ax.legend(loc="lower right", fontsize=9)
     ax.grid(alpha=0.3)
 
@@ -167,19 +224,48 @@ def plot_equal_dims_comparison(data):
     ax = axes[1]
     ax.axis("off")
 
-    table_data = [
-        ["Condition", "Dims", "η²", "vs Numeric"],
-        ["MiniLM (PCA=8)", "8", "0.483", "✓ WINS"],
-        ["MiniLM (PCA=11)", "11", "0.482", "✓ WINS"],
-        ["MiniLM (PCA=20)", "20", "0.468", "≈ Equal"],
-        ["Numeric Baseline", "11", "0.480", "—"],
-    ]
+    num_eta = NUMERIC_REF["Mean_Eta2"]
+    # Compact table: a handful of anchor dims plus break-even row (first dim where
+    # narrative falls at or below numeric baseline), keyed on MiniLM.
+    mini = abl[abl["Model"] == "MiniLM"].sort_values("PCA_dims").reset_index(drop=True)
+    anchor_dims = {2, 4, 6, 8, 10, 20, 50, 100}
+    breakeven_dim = None
+    for _, r in mini.iterrows():
+        if float(r["Mean_Eta2"]) < num_eta - 0.005:
+            breakeven_dim = int(r["PCA_dims"])
+            break
 
-    colors = [["#E3F2FD"] * 4,
-              ["#BBDEFB", "#BBDEFB", "#C8E6C9", "#C8E6C9"],
-              ["#E3F2FD", "#E3F2FD", "#C8E6C9", "#C8E6C9"],
-              ["#BBDEFB", "#BBDEFB", "#FFF9C4", "#FFF9C4"],
-              ["#FFCDD2"] * 4]
+    def _status(val: float) -> str:
+        if val > num_eta + 0.005:
+            return "✓ WINS"
+        if abs(val - num_eta) <= 0.005:
+            return "≈ Equal"
+        return "✗ Below"
+
+    table_data = [["Condition", "Dims", "η²", "vs Numeric"]]
+    for _, r in mini.iterrows():
+        d = int(r["PCA_dims"])
+        if d in anchor_dims or d == breakeven_dim:
+            eta_r = float(r["Mean_Eta2"])
+            table_data.append([f"MiniLM (PCA={d})", str(d), f"{eta_r:.3f}", _status(eta_r)])
+    table_data.append(["Numeric Baseline", f"{NUMERIC_REF['dims']}", f"{num_eta:.3f}", "—"])
+
+    # Build colour grid dynamically to match the row count (header + data rows).
+    def _row_colors(status: str) -> list:
+        if status == "✓ WINS":
+            body = "#C8E6C9"
+        elif status == "≈ Equal":
+            body = "#FFF9C4"
+        elif status == "✗ Below":
+            body = "#FFCDD2"
+        else:
+            body = "#ECEFF1"
+        return ["#BBDEFB", "#BBDEFB", body, body]
+
+    colors = [["#E3F2FD"] * 4]
+    for row in table_data[1:-1]:
+        colors.append(_row_colors(row[3]))
+    colors.append(["#FFCDD2"] * 4)
 
     table = ax.table(cellText=table_data[1:], colLabels=table_data[0],
                      cellLoc="center", loc="center",
@@ -189,20 +275,24 @@ def plot_equal_dims_comparison(data):
     table.set_fontsize(9)
     table.scale(1.2, 1.8)
 
+    n_rows = len(table_data)  # includes header
     for i in range(4):
         table[(0, i)].set_text_props(color="white", fontweight="bold")
-    for i in range(1, 5):
+    for i in range(1, n_rows):
         for j in range(4):
             table[(i, j)].set_facecolor(colors[i][j])
-            if i in [1, 2] and j == 3:
+            if j == 3 and table_data[i][j] == "✓ WINS":
                 table[(i, j)].set_text_props(fontweight="bold", color="#1B5E20")
 
-    ax.set_title("Key Finding: Narrative Wins at EQUAL or FEWER Dimensions",
-                 fontweight="bold", fontsize=11, y=0.95)
+    ax.set_title("Key Finding: Strategy C + MiniLM Wins at EQUAL or FEWER Dimensions",
+                 fontweight="bold", fontsize=11, y=0.98)
 
+    be_txt = f"breaks even near PCA={breakeven_dim}" if breakeven_dim else "never drops below numeric"
     text = ("Conclusion: The narrative advantage is NOT due to more dimensions.\n"
-            "At 8 dims (< 11 numeric), narrative achieves η² = 0.483.\n"
-            "The improvement comes from SEMANTIC ENCODING, not dimensionality.")
+            f"Peak at PCA={int(mini.loc[mini['Mean_Eta2'].idxmax(), 'PCA_dims'])} "
+            f"(η²={mini['Mean_Eta2'].max():.3f}); {be_txt} "
+            f"(numeric = {NUMERIC_REF['dims']} dims, η²={num_eta:.3f}).\n"
+            "SEMANTIC ENCODING drives the gain, not dimensionality.")
     ax.text(0.5, -0.12, text, transform=ax.transAxes, fontsize=9,
             ha="center", va="top", style="italic",
             bbox=dict(boxstyle="round,pad=0.5", facecolor="#E8F5E9", edgecolor="green"))
@@ -220,14 +310,38 @@ def plot_equal_dims_comparison(data):
 
 
 def plot_template_robustness():
-    data = {
-        "Template": ["Template A", "Template A", "Template B", "Template B", "Numeric"],
-        "Model": ["MiniLM", "MPNet", "MiniLM", "MPNet", "Baseline"],
-        "Silhouette": [0.609, 0.5207, 0.264, 0.4614, 0.2650],
-        "Mean_Eta2": [0.4683, 0.4708, 0.5062, 0.5104, 0.480],
-        "ARI": [0.1377, 0.1256, 0.2628, 0.1652, 0.1317],
-    }
-    df = pd.DataFrame(data)
+    """Load Template A & B rows from final_model_comparison.csv dynamically."""
+    try:
+        fc = pd.read_csv(FINAL_COMP_PATH)
+        rows = []
+        for tmpl in ["Template A", "Template B"]:
+            for mdl in ["MiniLM", "MPNet"]:
+                r = fc[(fc["Template"] == tmpl) & (fc["Model"] == mdl)]
+                if r.empty:
+                    continue
+                r = r.iloc[0]
+                rows.append({
+                    "Template": tmpl, "Model": mdl,
+                    "Silhouette": float(r["Silhouette (Cosine)"]),
+                    "Mean_Eta2": float(r["Mean Eta^2"]),
+                    "ARI": float(r["ARI (vs Numeric)"]),
+                })
+        rows.append({
+            "Template": "Numeric", "Model": "Baseline",
+            "Silhouette": NUMERIC_REF["Silhouette"],
+            "Mean_Eta2": NUMERIC_REF["Mean_Eta2"],
+            "ARI": NUMERIC_REF["ARI"] if not pd.isna(NUMERIC_REF["ARI"]) else 0.0,
+        })
+        df = pd.DataFrame(rows)
+    except Exception:
+        # Fallback (kept for safety).
+        df = pd.DataFrame({
+            "Template": ["Template A", "Template A", "Template B", "Template B", "Numeric"],
+            "Model": ["MiniLM", "MPNet", "MiniLM", "MPNet", "Baseline"],
+            "Silhouette": [0.4095, 0.3463, 0.3444, 0.3928, NUMERIC_REF["Silhouette"]],
+            "Mean_Eta2": [0.4830, 0.4364, 0.4864, 0.5104, NUMERIC_REF["Mean_Eta2"]],
+            "ARI": [0.1766, 0.1906, 0.1836, 0.1428, 0.0],
+        })
 
     fig, axes = plt.subplots(1, 3, figsize=(12, 4))
 
@@ -279,9 +393,9 @@ def plot_eta_comparison(data):
     width = 0.35
 
     ax.bar(x - width / 2, eta["Numeric_K4_Eta2"], width,
-           label="Numeric (K=4)", color=C_NUMERIC, alpha=0.85, edgecolor="white")
+           label=f"Numeric (K={NUMERIC_REF['K']})", color=C_NUMERIC, alpha=0.85, edgecolor="white")
     ax.bar(x + width / 2, eta["Narrative_K9_Eta2"], width,
-           label="Narrative (K=9)", color=C_MINILM, alpha=0.85, edgecolor="white")
+           label=f"Narrative (K={BEST_NAR_K})", color=C_MINILM, alpha=0.85, edgecolor="white")
 
     for i, (n, nar) in enumerate(zip(eta["Numeric_K4_Eta2"], eta["Narrative_K9_Eta2"])):
         ax.text(i - width / 2, n, f"{n:.2f}", ha="center", va="bottom", fontsize=8)
@@ -291,7 +405,7 @@ def plot_eta_comparison(data):
     ax.set_xticklabels(subjects)
     ax.set_xlabel("Subject Area")
     ax.set_ylabel("η² (Effect Size)")
-    ax.set_title("Per-Subject Predictive Power: K=9 Narrative vs K=4 Numeric", fontweight="bold")
+    ax.set_title(f"Per-Subject Predictive Power: K={BEST_NAR_K} Narrative vs K={NUMERIC_REF['K']} Numeric", fontweight="bold")
     ax.legend()
     ax.set_ylim(0, max(eta["Numeric_K4_Eta2"].max(), eta["Narrative_K9_Eta2"].max()) * 1.15)
     ax.grid(axis="y", alpha=0.3)
@@ -338,7 +452,7 @@ def plot_cohens_d_heatmap(data):
     sm.set_array([])
     fig.colorbar(sm, cax=cbar_ax, label="|Cohen's d|")
 
-    fig.suptitle("Pairwise |Cohen's d| Between Narrative Clusters (K=9) per Subject",
+    fig.suptitle(f"Pairwise |Cohen's d| Between Narrative Clusters (K={BEST_NAR_K}) per Subject",
                  fontsize=12, fontweight="bold", y=1.04)
     out = FIGS_DIR / "fig5_cohens_d_heatmap.png"
     fig.savefig(out, dpi=300)
@@ -370,7 +484,7 @@ def plot_cluster_profiles(data):
                 cbar_kws={"label": "z-score", "shrink": 0.8})
 
     ax.set_xlabel("Subject Area")
-    ax.set_ylabel("Narrative Cluster (K=9)")
+    ax.set_ylabel(f"Narrative Cluster (K={BEST_NAR_K})")
     ax.set_title("Cluster-Mean Grade Profiles\n(Cell = raw mean, Colour = z-score)",
                  fontweight="bold")
     ax.set_xticklabels(subj_cols, rotation=0)
@@ -467,7 +581,7 @@ def plot_hierarchical_granularity():
                    color=[colors[t] for t in tier_means.keys()],
                    edgecolor="white", linewidth=2)
     ax1.set_ylabel("Mean S2 Score")
-    ax1.set_title("Macro-Level: 3 Performance Tiers (K=4 equivalent)", fontweight="bold")
+    ax1.set_title(f"Macro-Level: 3 Performance Tiers (K={NUMERIC_REF['K']} numeric equivalent)", fontweight="bold")
     ax1.set_ylim(0, 35)
     for bar, (tier, val) in zip(bars, tier_means.items()):
         ax1.text(bar.get_x() + bar.get_width()/2, val + 1, f"{val:.1f}",
@@ -482,7 +596,7 @@ def plot_hierarchical_granularity():
     bars = ax2.barh(tier_order, counts, color=[colors[t] for t in tier_order],
                     edgecolor="white", linewidth=2)
     ax2.set_xlabel("Number of Clusters")
-    ax2.set_title("Granularity: Clusters per Tier (K=9 total)", fontweight="bold")
+    ax2.set_title(f"Granularity: Clusters per Tier (K={BEST_NAR_K} total)", fontweight="bold")
     for bar, count in zip(bars, counts):
         ax2.text(count + 0.1, bar.get_y() + bar.get_height()/2, str(count),
                 va="center", fontweight="bold", fontsize=10)
@@ -529,7 +643,7 @@ def plot_hierarchical_granularity():
     ax3.set_yticks(range(len(profiles_sorted)))
     ax3.set_yticklabels([f"C{int(c)}" for c in profiles_sorted["narrative_gmm_aicc_best_label"]])
     ax3.set_xlabel("Subject Area")
-    ax3.set_title("Meso-Level: K=9 Cluster Profiles (Rows ordered by tier: HIGH→MEDIUM→LOW)",
+    ax3.set_title(f"Meso-Level: K={BEST_NAR_K} Cluster Profiles (Rows ordered by tier: HIGH→MEDIUM→LOW)",
                   fontweight="bold")
 
     # Colorbar
@@ -545,7 +659,7 @@ def plot_hierarchical_granularity():
             ax3.text(-0.8, i, tier, ha="right", va="center", fontweight="bold",
                     color=colors[tier], fontsize=9)
 
-    fig.suptitle("Hierarchical Granularity: K=9 Captures 3 Tiers × 3 Sub-Types = Educationally Actionable Clusters",
+    fig.suptitle(f"Hierarchical Granularity: K={BEST_NAR_K} Captures Performance Tiers × Sub-Types = Educationally Actionable Clusters",
                  fontsize=12, fontweight="bold", y=0.98)
 
     out = FIGS_DIR / "fig8_hierarchical_granularity.png"

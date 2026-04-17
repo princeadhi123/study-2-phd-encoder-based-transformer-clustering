@@ -1,0 +1,5 @@
+Metric,Value
+Spearman_rho,0.5711156309941365
+Pearson_r,0.5356348704846293
+Mean_rho_narrative_features,0.34615668699384444
+Mean_rho_non_narrative_features,0.5732409584001711

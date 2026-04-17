@@ -1,0 +1,12 @@
+Feature,Spearman_rho,p_value,Significant
+n_items,,,False
+total_correct,0.6609904847148997,0.0,True
+total_incorrect,0.6609904847148997,0.0,True
+accuracy,0.6606269972732248,0.0,True
+avg_rt,0.23511299528226992,0.0,True
+var_rt,0.10343194207647259,0.0,True
+rt_cv,0.03160398135222479,3.901115763525935e-33,True
+longest_correct_streak,0.32942043964097717,0.0,True
+longest_incorrect_streak,0.40438182979568227,0.0,True
+consecutive_correct_rate,0.6585186235360592,0.0,True
+response_variance,0.39774190577071383,0.0,True

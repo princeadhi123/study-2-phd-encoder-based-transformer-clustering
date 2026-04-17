@@ -111,47 +111,61 @@ def load_all_data():
 def plot_dimensionality_ablation(data):
     abl = data["ablation"]
     metrics = [
-        ("Mean_Eta2", "Mean η²", 0, 0.55),
-        ("Silhouette_Cosine", "Silhouette (Cosine)", 0, 0.7),
-        ("Calinski_Harabasz", "Calinski-Harabasz", 0, 400),
-        ("ARI_vs_Numeric", "ARI vs Numeric", 0, 0.25),
+        ("Mean_Eta2", "Mean η² (higher is better)", "{:.2f}"),
+        ("Silhouette_Cosine", "Silhouette — Cosine (higher is better)", "{:.2f}"),
+        ("Calinski_Harabasz", "Calinski–Harabasz (higher is better)", "{:.0f}"),
+        ("Davies_Bouldin", "Davies–Bouldin (lower is better)", "{:.2f}"),
     ]
 
-    fig, axes = plt.subplots(1, 4, figsize=(16, 4))
+    pca_dims = sorted(abl["PCA_dims"].unique())
+    models = list(abl["Model"].unique())
+    x = np.arange(len(pca_dims))
+    width = 0.38
 
-    for ax, (col, label, ymin, ymax) in zip(axes, metrics):
-        models = abl["Model"].unique()
-        pca_dims = sorted(abl["PCA_dims"].unique())
-        x = np.arange(len(pca_dims))
-        width = 0.35
+    # 2 x 2 grid: first two metrics on top row, last two on bottom.
+    fig, axes = plt.subplots(2, 2, figsize=(14, 8))
+    axes = axes.flatten()
 
+    for ax, (col, label, fmt) in zip(axes, metrics):
+        # Plot model bars.
         for i, model in enumerate(models):
             sub = abl[abl["Model"] == model].sort_values("PCA_dims")
-            vals = sub[col].values
+            vals = sub[col].to_numpy()
             color = C_MINILM if model == "MiniLM" else C_MPNET
-            bars = ax.bar(x + i * width, vals, width, label=model, color=color,
-                          alpha=0.85, edgecolor="white", linewidth=0.5)
+            bars = ax.bar(x + (i - 0.5) * width, vals, width,
+                          label=f"Strategy C + {model}", color=color,
+                          alpha=0.9, edgecolor="white", linewidth=0.6)
             for bar, v in zip(bars, vals):
                 ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height(),
-                        f"{v:.3f}", ha="center", va="bottom", fontsize=6.5)
+                        fmt.format(v), ha="center", va="bottom",
+                        fontsize=7, rotation=90)
 
-        # Numeric baseline
-        ref = NUMERIC_REF.get(col.replace("_Cosine", "").replace("_vs_Numeric", ""), None)
-        if ref:
+        # Numeric baseline.
+        ref_key = col.replace("_Cosine", "").replace("_vs_Numeric", "")
+        ref = NUMERIC_REF.get(ref_key)
+        if ref is not None and not (isinstance(ref, float) and np.isnan(ref)):
             ax.axhline(ref, color=C_NUMERIC, linestyle="--", linewidth=1.5,
                        label=f"Numeric ({NUMERIC_REF['dims']} dims)")
 
-        ax.set_xticks(x + width / 2)
+        # Auto-tight ylim with 35% headroom for rotated bar labels.
+        data_max = float(abl[col].max()) if not abl[col].isna().all() else 1.0
+        if ref is not None and not (isinstance(ref, float) and np.isnan(ref)):
+            data_max = max(data_max, float(ref))
+        ax.set_ylim(0, data_max * 1.35)
+
+        ax.set_xticks(x)
         ax.set_xticklabels([str(d) for d in pca_dims])
         ax.set_xlabel("PCA Components")
-        ax.set_title(label, fontweight="bold")
-        ax.set_ylim(ymin, ymax)
-        ax.legend(loc="best", fontsize=7)
+        ax.set_title(label, fontweight="bold", fontsize=10.5)
+        ax.legend(loc="upper right", fontsize=7.5, framealpha=0.9)
         ax.grid(axis="y", alpha=0.3, linewidth=0.5)
         ax.set_axisbelow(True)
 
-    fig.suptitle("Dimensionality-Controlled Ablation: Narrative at PCA=8,11,20 vs Numeric Baseline",
-                 fontsize=12, fontweight="bold", y=1.02)
+    fig.suptitle(
+        "Dimensionality-Controlled Ablation: Strategy C Narrative vs Numeric Baseline "
+        f"(PCA sweep {pca_dims[0]}–{pca_dims[-1]})",
+        fontsize=12, fontweight="bold", y=1.03,
+    )
     fig.tight_layout()
     out = FIGS_DIR / "fig1_dimensionality_ablation.png"
     fig.savefig(out, dpi=300)
@@ -168,8 +182,8 @@ def plot_equal_dims_comparison(data):
     abl = data["ablation"]
 
     # Wider figure so the 10 x-axis ticks are legible.
-    fig, axes = plt.subplots(1, 2, figsize=(15, 5.2),
-                             gridspec_kw={"width_ratios": [1.25, 1.0]})
+    fig, axes = plt.subplots(1, 2, figsize=(16, 5.2),
+                             gridspec_kw={"width_ratios": [1.25, 1.0], "wspace": 0.35})
 
     # Panel 1: plot on uniformly-spaced categorical positions so low-dim gap is even.
     ax = axes[0]
@@ -242,16 +256,25 @@ def plot_equal_dims_comparison(data):
             return "≈ Equal"
         return "✗ Below"
 
+    # PCA=8 is the production setting used in the paper (K=8 composite winner).
+    production_dim = 8
     table_data = [["Condition", "Dims", "η²", "vs Numeric"]]
     for _, r in mini.iterrows():
         d = int(r["PCA_dims"])
         if d in anchor_dims or d == breakeven_dim:
             eta_r = float(r["Mean_Eta2"])
-            table_data.append([f"MiniLM (PCA={d})", str(d), f"{eta_r:.3f}", _status(eta_r)])
+            prefix = "★ " if d == production_dim else ""
+            table_data.append([
+                f"{prefix}Strategy C + MiniLM (PCA={d})",
+                str(d), f"{eta_r:.3f}", _status(eta_r),
+            ])
     table_data.append(["Numeric Baseline", f"{NUMERIC_REF['dims']}", f"{num_eta:.3f}", "—"])
 
     # Build colour grid dynamically to match the row count (header + data rows).
-    def _row_colors(status: str) -> list:
+    def _row_colors(status: str, is_production: bool) -> list:
+        if is_production:
+            # Distinct highlight for the production setting (PCA=8, K=8).
+            return ["#FFE082", "#FFE082", "#FFD54F", "#FFD54F"]
         if status == "✓ WINS":
             body = "#C8E6C9"
         elif status == "≈ Equal":
@@ -264,13 +287,13 @@ def plot_equal_dims_comparison(data):
 
     colors = [["#E3F2FD"] * 4]
     for row in table_data[1:-1]:
-        colors.append(_row_colors(row[3]))
+        colors.append(_row_colors(row[3], row[0].startswith("★ ")))
     colors.append(["#FFCDD2"] * 4)
 
     table = ax.table(cellText=table_data[1:], colLabels=table_data[0],
                      cellLoc="center", loc="center",
                      colColours=["#1976D2"] * 4,
-                     colWidths=[0.35, 0.18, 0.18, 0.22])
+                     colWidths=[0.48, 0.14, 0.16, 0.22])
     table.auto_set_font_size(False)
     table.set_fontsize(9)
     table.scale(1.2, 1.8)
@@ -279,9 +302,12 @@ def plot_equal_dims_comparison(data):
     for i in range(4):
         table[(0, i)].set_text_props(color="white", fontweight="bold")
     for i in range(1, n_rows):
+        is_prod = table_data[i][0].startswith("★ ")
         for j in range(4):
             table[(i, j)].set_facecolor(colors[i][j])
-            if j == 3 and table_data[i][j] == "✓ WINS":
+            if is_prod:
+                table[(i, j)].set_text_props(fontweight="bold", color="#BF360C")
+            elif j == 3 and table_data[i][j] == "✓ WINS":
                 table[(i, j)].set_text_props(fontweight="bold", color="#1B5E20")
 
     ax.set_title("Key Finding: Strategy C + MiniLM Wins at EQUAL or FEWER Dimensions",

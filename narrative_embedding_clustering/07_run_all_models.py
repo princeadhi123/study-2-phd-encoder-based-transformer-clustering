@@ -37,6 +37,12 @@ def main() -> None:
                 print(f"[template {template} | model {model}] Running {script} with BATCH_SIZE={args.batch_size}")
                 subprocess.run([sys.executable, str(script_path)], check=True, env=env)
 
+    # Final step: Generate metrics plots (Template A/B/C comparisons)
+    print("\n==> Running metrics plotting (06_plot_metrics.py)")
+    plot_script = base_dir / "06_plot_metrics.py"
+    subprocess.run([sys.executable, str(plot_script)], check=True)
+    print("\nPipeline complete!")
+
 
 if __name__ == "__main__":
     main()

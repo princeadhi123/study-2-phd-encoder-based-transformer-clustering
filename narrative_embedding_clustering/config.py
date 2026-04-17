@@ -10,7 +10,7 @@ MARKS_WITH_CLUSTERS_PATH = BASE_DIR / "diagnostics" / "cluster input features" /
 EMBEDDING_BACKEND = "sentence-transformers"
 EMBEDDING_MODEL_NAME = os.getenv("EMBEDDING_MODEL_NAME", "all-mpnet-base-v2")
 
-K_RANGE = range(2, 101)
+K_RANGE = range(2, 16)
 
 NARRATIVE_TEMPLATE_VERSION = os.getenv("NARRATIVE_TEMPLATE_VERSION", "A")
 

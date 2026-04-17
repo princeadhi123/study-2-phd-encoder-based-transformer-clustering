@@ -62,7 +62,7 @@ EMB_PATH = OUTPUTS_ROOT / "template_A" / "all_MiniLM_L6_v2" / "embeddings.npy"
 INDEX_PATH = OUTPUTS_ROOT / "template_A" / "all_MiniLM_L6_v2" / "embeddings_index.csv"
 NAR_CLUSTERS_PATH = OUTPUTS_ROOT / "template_A" / "all_MiniLM_L6_v2" / "narrative_clusters.csv"
 
-K_RANGE = range(2, 101)
+K_RANGE = range(2, 16)
 COVARIANCE_TYPES = ("full", "diag", "tied", "spherical")
 
 

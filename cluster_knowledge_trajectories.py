@@ -164,7 +164,7 @@ def scale_features(feats: pd.DataFrame, feature_cols: list) -> Tuple[np.ndarray,
     return Xs, scaler
 
 
-def kmeans_sweep(X: np.ndarray, k_range=range(2, 16)) -> Tuple[np.ndarray, Dict]:
+def kmeans_sweep(X: np.ndarray, k_range=range(2, 11)) -> Tuple[np.ndarray, Dict]:
     best = {"k": None, "sil": -1.0, "ch": None, "db": None}
     best_labels = None
     for k in k_range:
@@ -184,7 +184,7 @@ def kmeans_sweep(X: np.ndarray, k_range=range(2, 16)) -> Tuple[np.ndarray, Dict]
     return best_labels, best
 
 
-def _silhouette_curve_kmeans(X: np.ndarray, k_range=range(2, 16)) -> pd.DataFrame:
+def _silhouette_curve_kmeans(X: np.ndarray, k_range=range(2, 11)) -> pd.DataFrame:
     rows = []
     for k in k_range:
         km = KMeans(n_clusters=k, random_state=42, n_init=10)
@@ -197,7 +197,7 @@ def _silhouette_curve_kmeans(X: np.ndarray, k_range=range(2, 16)) -> pd.DataFram
     return pd.DataFrame(rows)
 
 
-def _silhouette_curve_agglomerative(X: np.ndarray, k_range=range(2, 16)) -> pd.DataFrame:
+def _silhouette_curve_agglomerative(X: np.ndarray, k_range=range(2, 11)) -> pd.DataFrame:
     rows = []
     for k in k_range:
         agg = AgglomerativeClustering(n_clusters=k, linkage="ward")
@@ -212,7 +212,7 @@ def _silhouette_curve_agglomerative(X: np.ndarray, k_range=range(2, 16)) -> pd.D
 
 def _silhouette_curve_gmm(
     X: np.ndarray,
-    k_range=range(2, 16),
+    k_range=range(2, 11),
     covariance_types=("full", "diag", "tied", "spherical"),
 ) -> pd.DataFrame:
     rows = []
@@ -239,7 +239,7 @@ def _silhouette_curve_gmm(
 
 def _silhouette_curve_birch(
     X: np.ndarray,
-    k_range=range(2, 16),
+    k_range=range(2, 11),
     thresholds=(0.3, 0.5, 0.7, 0.9),
     branching_factor: int = 50,
 ) -> pd.DataFrame:
@@ -703,7 +703,7 @@ def dbscan_multi_grid_diagnostics(
 
 def gmm_bic_aic_grid(
     X: np.ndarray,
-    k_range=range(2, 16),
+    k_range=range(2, 11),
     covariance_types=("full", "diag", "tied", "spherical"),
 ) -> Tuple[pd.DataFrame, Dict, Dict]:
     rows = []
@@ -837,7 +837,7 @@ def dbscan_k_distance_plot(
     plt.close()
 
 
-def agglomerative_sweep(X: np.ndarray, k_range=range(2, 16)) -> Tuple[np.ndarray, Dict]:
+def agglomerative_sweep(X: np.ndarray, k_range=range(2, 11)) -> Tuple[np.ndarray, Dict]:
     best = {"k": None, "sil": -1.0, "ch": None, "db": None}
     best_labels = None
     for k in k_range:
@@ -859,7 +859,7 @@ def agglomerative_sweep(X: np.ndarray, k_range=range(2, 16)) -> Tuple[np.ndarray
 
 def gmm_sweep(
     X: np.ndarray,
-    k_range=range(2, 16),
+    k_range=range(2, 11),
     covariance_types=("full", "diag", "tied", "spherical"),
 ) -> Tuple[np.ndarray, Dict]:
     best = {"k": None, "covariance_type": None, "sil": -1.0}
@@ -884,7 +884,7 @@ def gmm_sweep(
 
 def birch_sweep(
     X: np.ndarray,
-    k_range=range(2, 16),
+    k_range=range(2, 11),
     thresholds=(0.3, 0.5, 0.7, 0.9),
     branching_factor: int = 50,
 ) -> Tuple[np.ndarray, Dict]:
@@ -1144,10 +1144,10 @@ def main():
     # ----------------------------------
 
 
-    km_labels, km_best = kmeans_sweep(Xs, k_range=range(2, 16))
-    ag_labels, ag_best = agglomerative_sweep(Xs, k_range=range(2, 16))
-    gm_labels, gm_best = gmm_sweep(Xs, k_range=range(2, 16))
-    br_labels, br_best = birch_sweep(Xs, k_range=range(2, 16))
+    km_labels, km_best = kmeans_sweep(Xs, k_range=range(2, 11))
+    ag_labels, ag_best = agglomerative_sweep(Xs, k_range=range(2, 11))
+    gm_labels, gm_best = gmm_sweep(Xs, k_range=range(2, 11))
+    br_labels, br_best = birch_sweep(Xs, k_range=range(2, 11))
 
     diagnostics_dir = out_dir / "diagnostics"
     diagnostics_dir.mkdir(parents=True, exist_ok=True)
@@ -1155,10 +1155,10 @@ def main():
     model_results_dir.mkdir(parents=True, exist_ok=True)
 
     # Per-K silhouette curves (CSV + plots)
-    km_curve = _silhouette_curve_kmeans(Xs, k_range=range(2, 16))
-    ag_curve = _silhouette_curve_agglomerative(Xs, k_range=range(2, 16))
-    gm_curve = _silhouette_curve_gmm(Xs, k_range=range(2, 16))
-    br_curve = _silhouette_curve_birch(Xs, k_range=range(2, 16))
+    km_curve = _silhouette_curve_kmeans(Xs, k_range=range(2, 11))
+    ag_curve = _silhouette_curve_agglomerative(Xs, k_range=range(2, 11))
+    gm_curve = _silhouette_curve_gmm(Xs, k_range=range(2, 11))
+    br_curve = _silhouette_curve_birch(Xs, k_range=range(2, 11))
     km_curve.to_csv(model_results_dir / "kmeans_silhouette_vs_k.csv", index=False)
     ag_curve.to_csv(model_results_dir / "agglomerative_silhouette_vs_k.csv", index=False)
     gm_curve.to_csv(model_results_dir / "gmm_silhouette_vs_k.csv", index=False)
@@ -1169,7 +1169,7 @@ def main():
     _save_line_plot(br_curve, "K", "silhouette", "Birch silhouette vs K", figures_dir / "birch" / "birch_silhouette_vs_k.png")
 
     # GMM information-criteria diagnostics (BIC/AIC/AICc)
-    gm_bic_df, gm_bic_best, gm_aic_best, gm_aicc_best = gmm_bic_aic_grid(Xs, k_range=range(2, 16))
+    gm_bic_df, gm_bic_best, gm_aic_best, gm_aicc_best = gmm_bic_aic_grid(Xs, k_range=range(2, 11))
     gm_bic_df.to_csv(model_results_dir / "gmm_model_selection.csv", index=False)
     _save_line_plot_hue(gm_bic_df, "K", "bic", "covariance_type", "GMM BIC vs K", figures_dir / "gmm" / "BIC" / "gmm_bic_vs_k.png")
     _save_line_plot_hue(gm_bic_df, "K", "aic", "covariance_type", "GMM AIC vs K", figures_dir / "gmm" / "AIC" / "gmm_aic_vs_k.png")

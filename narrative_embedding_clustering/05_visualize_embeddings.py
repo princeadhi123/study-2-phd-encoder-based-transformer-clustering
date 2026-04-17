@@ -473,11 +473,13 @@ def main() -> None:
     # --- Load Features and Enforce PCA Orientation ---
     if DERIVED_FEATURES_PATH.exists():
         df_features = pd.read_csv(DERIVED_FEATURES_PATH)
-        # Recalculate derived columns
+        # Recalculate derived columns only if missing (new 8-feature schema already has them)
         with np.errstate(divide="ignore", invalid="ignore"):
-            df_features["accuracy"] = df_features["total_correct"] / df_features["n_items"].replace(0, np.nan)
-            std_rt = np.sqrt(df_features["var_rt"].clip(lower=0.0))
-            df_features["rt_cv"] = std_rt / df_features["avg_rt"].replace(0, np.nan)
+            if "accuracy" not in df_features.columns and "total_correct" in df_features.columns:
+                df_features["accuracy"] = df_features["total_correct"] / df_features["n_items"].replace(0, np.nan)
+            if "rt_cv" not in df_features.columns and "var_rt" in df_features.columns and "avg_rt" in df_features.columns:
+                std_rt = np.sqrt(df_features["var_rt"].clip(lower=0.0))
+                df_features["rt_cv"] = std_rt / df_features["avg_rt"].replace(0, np.nan)
         
         # Enforce consistent signs (e.g. PC1 = Low Perf, PC3 = Slow)
         print("Checking PCA orientation against behavioral anchors...")

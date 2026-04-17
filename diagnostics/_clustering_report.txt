@@ -2,39 +2,39 @@ Clustering Performance Report
 ============================
 
 N students: 537
-Features used: n_items, total_correct, total_incorrect, accuracy, avg_rt, var_rt, rt_cv, longest_correct_streak, longest_incorrect_streak, consecutive_correct_rate, response_variance
+Features used: n_items, accuracy, avg_rt, var_rt, rt_cv, longest_correct_streak, longest_incorrect_streak, consecutive_correct_rate
 
 KMeans
   best_k: 2
-  silhouette: 0.3410694750001678
-  calinski_harabasz: 327.7764433999679
-  davies_bouldin: 1.1541475149866036
+  silhouette: 0.3076917395924289
+  calinski_harabasz: 228.26903314217984
+  davies_bouldin: 1.3483099951670565
 
 Agglomerative
   best_k: 2
-  silhouette: 0.3295990176735135
-  calinski_harabasz: 303.23596931564936
-  davies_bouldin: 1.169853830142246
+  silhouette: 0.2745022416928582
+  calinski_harabasz: 183.00630710157222
+  davies_bouldin: 1.3414688708126605
 
 Birch
   best_k: 2
-  silhouette: 0.44090768448895057
-  calinski_harabasz: 196.07710539591457
-  davies_bouldin: 0.8614719859845409
+  silhouette: 0.41092014729150966
+  calinski_harabasz: 166.19474465786897
+  davies_bouldin: 0.9584139930098753
 
 GMM (Silhouette Best)
   best_k: 2
   covariance_type: tied
-  silhouette: 0.44490495828641474
+  silhouette: 0.3900849406605205
 
 GMM model selection (information criteria and internal validity)
-  best_by_BIC: k=6, cov=full, BIC=-14023.496340074507, AIC=-16025.057450210148, AICc=-9690.100928470998, silhouette=0.17168497121653828, CH=217.05210120976105, DB=1.4337763619512083
-  best_by_AIC: k=10, cov=full, BIC=-13157.905917978966, AIC=-16496.69843360137, AICc=inf, silhouette=0.12922926571175777, CH=157.56430072973203, DB=1.4676651986463027
-  best_by_AICc: k=4, cov=full, BIC=-13850.598084443787, AIC=-15183.543491836044, AICc=-14321.036825169378, silhouette=0.2650017723065611, CH=254.88217963105674, DB=1.164702615748249
+  best_by_BIC: k=5, cov=full, BIC=-1819.9701868983439, AIC=-2780.0337600683297, AICc=-2456.9568369914064, silhouette=0.13124947681975035, CH=144.76848155006277, DB=1.5168555502438437
+  best_by_AIC: k=15, cov=full, BIC=-632.0453122132958, AIC=-3520.8080279122705, AICc=inf, silhouette=0.052319907385323654, CH=75.24739252132771, DB=1.8515760828953984
+  best_by_AICc: k=5, cov=full, BIC=-1819.9701868983439, AIC=-2780.0337600683297, AICc=-2456.9568369914064, silhouette=0.13124947681975035, CH=144.76848155006277, DB=1.5168555502438437
 
 Best overall clustering (by silhouette)
-  algorithm: gmm
-  silhouette: 0.44490495828641474
+  algorithm: birch
+  silhouette: 0.41092014729150966
   k: 2
-  covariance_type: tied
+  threshold: 0.5
 

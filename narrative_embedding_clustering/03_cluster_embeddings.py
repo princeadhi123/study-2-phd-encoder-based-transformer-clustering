@@ -18,10 +18,9 @@ def main() -> None:
     index_df = pd.read_csv(index_path)
 
     # 1. Fix Curse of Dimensionality: Apply PCA
-    # Reduce to 20 components to allow AICc to accept higher K models (Parameters < Sample Size)
-    # With D=50, K=6 Diag model has > 600 params > 537 samples -> Rejected.
-    # With D=20, K=10 Diag model has ~400 params < 537 samples -> Accepted.
-    n_components = min(20, X_raw.shape[0], X_raw.shape[1])
+    # Reduce to 8 components to match the 8 narrative variables used in Template C,
+    # ensuring a fair apples-to-apples comparison against the 8-feature numeric baseline.
+    n_components = min(8, X_raw.shape[0], X_raw.shape[1])
     print(f"Applying PCA to reduce dimensionality (target components={n_components})...")
     pca = PCA(n_components=n_components, random_state=42)
     X = pca.fit_transform(X_raw)

@@ -48,12 +48,14 @@ def build_narratives(df: pd.DataFrame, marks_df: pd.DataFrame | None = None) -> 
             feats = feats.merge(marks_sel, on="IDCode", how="left")
 
     # Ensure we have derived columns needed for narratives.
-    # Current derived_features.csv has total_correct but not accuracy, and no rt_cv.
-    # Compute accuracy as proportion correct, and rt_cv as (std_rt / mean_rt).
+    # derived_features.csv already contains accuracy and rt_cv when produced by
+    # the updated 8-feature numeric pipeline; only compute if missing (back-compat).
     with np.errstate(divide="ignore", invalid="ignore"):
-        feats["accuracy"] = feats["total_correct"] / feats["n_items"].replace(0, np.nan)
-        std_rt = np.sqrt(feats["var_rt"].clip(lower=0.0))
-        feats["rt_cv"] = std_rt / feats["avg_rt"].replace(0, np.nan)
+        if "accuracy" not in feats.columns and "total_correct" in feats.columns:
+            feats["accuracy"] = feats["total_correct"] / feats["n_items"].replace(0, np.nan)
+        if "rt_cv" not in feats.columns and "var_rt" in feats.columns and "avg_rt" in feats.columns:
+            std_rt = np.sqrt(feats["var_rt"].clip(lower=0.0))
+            feats["rt_cv"] = std_rt / feats["avg_rt"].replace(0, np.nan)
 
     # Impute missing values to avoid "unknown" clusters (Issue 6)
     # Using median imputation for numeric features

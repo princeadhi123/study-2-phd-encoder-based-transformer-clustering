@@ -1123,10 +1123,10 @@ def main():
     if EXCLUDED_STUDENTS:
         feats = feats[~feats["IDCode"].isin(EXCLUDED_STUDENTS)].reset_index(drop=True)
 
+    # 8 features matched to the narrative Template C variables for a fair
+    # apples-to-apples comparison against the narrative embedding pipeline.
     feature_cols = [
         "n_items",
-        "total_correct",
-        "total_incorrect",
         "accuracy",
         "avg_rt",
         "var_rt",
@@ -1134,7 +1134,6 @@ def main():
         "longest_correct_streak",
         "longest_incorrect_streak",
         "consecutive_correct_rate",
-        "response_variance",
     ]
 
     Xs, scaler = scale_features(feats, feature_cols)

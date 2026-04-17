@@ -91,23 +91,64 @@ def mean_eta_squared(template: str, embedding_id: str) -> float:
 
 
 def numeric_row() -> dict:
-    """Build a Numeric Baseline row using GMM-AICc."""
+    """Build a Numeric Baseline row using GMM-AICc.
+
+    Internal validity (silhouette/CH/DB) are computed in the numeric 8-D
+    standardized feature space using the gmm_aicc_best_label from
+    student_clusters.csv, then the AICc winner (K, cov) is read from
+    diagnostics/model results/gmm_model_selection.csv.
+    """
+    from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score
+    from sklearn.preprocessing import StandardScaler
+
     anova_path = OUTPUT_ROOT / "numeric_marks_anova_by_cluster.csv"
     df = pd.read_csv(anova_path)
     sub = df[(df["cluster_label"] == "gmm_aicc_best_label") & (df["outcome"].isin(SUBJECTS))]
     mean_eta = float(sub["eta_squared"].mean()) if not sub.empty else float("nan")
-    # Numeric K=4 (AICc) is the standard baseline; sil/CH/DB are not computed for numeric against narrative embedding space.
-    # Use placeholders sourced from the paper's original final_model_comparison (K=4, full cov).
-    # We set internal metrics to NaN so the heatmap normalization uses narrative rows only.
+
+    # Recompute internal metrics from the numeric feature space.
+    sil = ch = db = float("nan")
+    k_val = 0
+    cov_val = "unknown"
+    try:
+        feats_path = PROJECT_ROOT / "diagnostics" / "cluster input features" / "derived_features.csv"
+        labels_path = PROJECT_ROOT / "diagnostics" / "student cluster labels" / "student_clusters.csv"
+        gmm_sel_path = PROJECT_ROOT / "diagnostics" / "model results" / "gmm_model_selection.csv"
+
+        feats = pd.read_csv(feats_path)
+        labels_df = pd.read_csv(labels_path)[["IDCode", "gmm_aicc_best_label"]]
+
+        feature_cols = [
+            "n_items", "accuracy", "avg_rt", "var_rt", "rt_cv",
+            "longest_correct_streak", "longest_incorrect_streak",
+            "consecutive_correct_rate",
+        ]
+        merged = feats.merge(labels_df, on="IDCode", how="inner").dropna(subset=feature_cols + ["gmm_aicc_best_label"])
+        X = StandardScaler().fit_transform(merged[feature_cols].to_numpy(dtype=float))
+        y = merged["gmm_aicc_best_label"].to_numpy()
+        if len(np.unique(y)) > 1:
+            sil = float(silhouette_score(X, y))
+            ch = float(calinski_harabasz_score(X, y))
+            db = float(davies_bouldin_score(X, y))
+            k_val = int(len(np.unique(y)))
+
+        # AICc winner K, cov from grid
+        gm_df = pd.read_csv(gmm_sel_path)
+        best = gm_df.loc[gm_df["aicc"].idxmin()]
+        k_val = int(best["K"])
+        cov_val = str(best["covariance_type"])
+    except Exception as exc:
+        print(f"WARN numeric_row internal metrics: {exc}")
+
     return {
         "Template": "Numeric",
         "Model": "GMM-AICc",
-        "Winner K": 4,
-        "Winner Cov": "full",
-        "Silhouette (Cosine)": np.nan,
-        "Calinski-Harabasz": np.nan,
-        "Davies-Bouldin": np.nan,
-        "ARI (vs Numeric)": np.nan,  # filled by plot script from narrative mean
+        "Winner K": k_val,
+        "Winner Cov": cov_val,
+        "Silhouette (Cosine)": round(sil, 4) if not np.isnan(sil) else np.nan,
+        "Calinski-Harabasz": round(ch, 4) if not np.isnan(ch) else np.nan,
+        "Davies-Bouldin": round(db, 4) if not np.isnan(db) else np.nan,
+        "ARI (vs Numeric)": np.nan,  # self-reference; filled by plot script
         "Mean Eta^2": mean_eta,
     }
 

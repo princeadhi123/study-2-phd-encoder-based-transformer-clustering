@@ -1,8 +1,8 @@
 Template,Model,Winner K,Winner Cov,Silhouette (Cosine),Calinski-Harabasz,Davies-Bouldin,ARI (vs Numeric),Mean Eta^2
-Template A,MiniLM,33,tied,0.5121,564.4081,0.7442,0.0755,0.5384
-Template A,MPNet,34,tied,0.4649,359.6987,0.7831,0.0757,0.5323
-Template B,MiniLM,15,tied,0.3729,181.4782,1.1223,0.1422,0.5173
-Template B,MPNet,29,tied,0.3646,164.863,1.0063,0.0798,0.5318
-Template C,MiniLM,10,tied,0.1027,43.2834,1.8497,0.0928,0.1276
-Template C,MPNet,9,tied,0.0742,42.1718,2.008,0.0343,0.0545
-Numeric,GMM-AICc,4,full,,,,,0.47580598592480483
+Template A,MiniLM,8,full,0.4095,282.2785,1.077,0.1766,0.483
+Template A,MPNet,7,full,0.3463,353.7482,1.3698,0.1906,0.4364
+Template B,MiniLM,6,full,0.3444,214.5022,1.1898,0.1836,0.4864
+Template B,MPNet,10,tied,0.3928,182.9747,1.0376,0.1428,0.5104
+Template C,MiniLM,10,tied,0.1027,43.2834,1.8497,0.0627,0.1276
+Template C,MPNet,9,tied,0.0742,42.1718,2.008,0.0325,0.0545
+Numeric,GMM-AICc,5,full,0.1312,144.7685,1.5169,,0.396353615190689

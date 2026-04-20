@@ -127,15 +127,19 @@ def plot_heatmap(df):
     # Select columns to plot
     cols_to_plot = [
         "Internal Score",
-        "ARI_Norm", 
-        "Eta_Norm", 
+        "ARI_Norm",
+        "Eta_Norm",
         "Composite"
     ]
-    
-    # Rename for display
+
+    # Rename for display. All four columns are normalized so "higher = better";
+    # Davies-Bouldin is already inverted inside Internal Score. The ↑ arrow
+    # makes that direction explicit to the reader.
     plot_data = df_norm[cols_to_plot].rename(columns={
-        "ARI_Norm": "ARI (vs Numeric)\nScore",
-        "Eta_Norm": "Mean Eta^2\nScore"
+        "Internal Score": "Internal\nScore ↑",
+        "ARI_Norm": "ARI (vs Numeric)\nScore ↑",
+        "Eta_Norm": "Mean Eta^2\nScore ↑",
+        "Composite": "Composite ↑",
     })
     
     # Plot - Compact Size for Paper
@@ -145,7 +149,11 @@ def plot_heatmap(df):
     # Custom colormap (Blue = Lower, Red = Higher)
     cmap = "coolwarm"
     
-    ax = sns.heatmap(plot_data, annot=True, fmt=".4f", cmap=cmap, linewidths=.5, cbar_kws={'label': 'Normalized Score', 'shrink': 1.0})
+    ax = sns.heatmap(
+        plot_data, annot=True, fmt=".4f", cmap=cmap, linewidths=.5,
+        vmin=0.0, vmax=1.0,
+        cbar_kws={'label': 'Normalized Score', 'shrink': 1.0, 'ticks': [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]},
+    )
     
     plt.title("Model Decision Matrix (Normalized Scores)", fontsize=11, fontweight='bold', pad=10)
     plt.ylabel("") # Hide "Label" label
@@ -167,11 +175,11 @@ def plot_heatmap(df):
     # Save the computed scores to CSV
     scores_path = FIGURES_DIR / "model_decision_scores.csv"
     # plot_data already has the correct column names and data
-    df_export = plot_data.sort_values("Composite", ascending=False)
+    df_export = plot_data.sort_values("Composite ↑", ascending=False)
     df_export.to_csv(scores_path)
     print(f"Composite scores saved to {scores_path}")
     print("\nTop 3 Models by Composite Score:")
-    print(df_export.head(3)[["Composite"]])
+    print(df_export.head(3)[["Composite ↑"]])
 
 if __name__ == "__main__":
     if not INPUT_FILE.exists():

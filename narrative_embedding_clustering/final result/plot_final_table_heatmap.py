@@ -67,22 +67,24 @@ def main():
     )
     df = df.set_index('Label')
     
-    # Rename columns to match desired output
+    # Rename columns to match desired output. Arrows make the "better" direction
+    # explicit: ↑ = higher is better, ↓ = lower is better. All colours are
+    # min-max normalized per column so red always means "best in this column".
     df = df.rename(columns={
-        'Silhouette (Cosine)': 'Silhouette\nScore',
-        'Calinski-Harabasz': 'Calinski-Harabasz\nScore',
-        'Davies-Bouldin': 'Davies-Bouldin\nScore',
-        'ARI (vs Numeric)': 'ARI (vs Numeric)\nScore',
-        'Mean Eta^2': 'Mean Eta^2\nScore'
+        'Silhouette (Cosine)': 'Silhouette\nScore ↑',
+        'Calinski-Harabasz': 'Calinski-Harabasz\nScore ↑',
+        'Davies-Bouldin': 'Davies-Bouldin\nScore ↓',
+        'ARI (vs Numeric)': 'ARI (vs Numeric)\nScore ↑',
+        'Mean Eta^2': 'Mean Eta^2\nScore ↑'
     })
-    
+
     # Select numeric metrics for the heatmap
     metrics = [
-        'Silhouette\nScore', 
-        'Calinski-Harabasz\nScore', 
-        'Davies-Bouldin\nScore', 
-        'ARI (vs Numeric)\nScore', 
-        'Mean Eta^2\nScore'
+        'Silhouette\nScore ↑',
+        'Calinski-Harabasz\nScore ↑',
+        'Davies-Bouldin\nScore ↓',
+        'ARI (vs Numeric)\nScore ↑',
+        'Mean Eta^2\nScore ↑'
     ]
     
     # Create annotation dataframe (Raw Values)

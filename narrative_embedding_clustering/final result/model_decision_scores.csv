@@ -1,6 +1,7 @@
-Model Name,Internal Score,"ARI (vs Numeric)
-Score","Mean Eta^2
-Score",Composite
+Model Name,"Internal
+Score ↑","ARI (vs Numeric)
+Score ↑","Mean Eta^2
+Score ↑",Composite ↑
 Strategy C + MiniLM (K=8),0.9204604610450652,0.9265477439664219,0.9463166144200628,0.9311082731438499
 Strategy C + MPNet (K=7),0.8830518253469819,1.0,0.8550156739811913,0.9126891664427244
 Strategy B + MiniLM (K=6),0.7392173745846077,0.963273871983211,0.9529780564263324,0.8851564343313837

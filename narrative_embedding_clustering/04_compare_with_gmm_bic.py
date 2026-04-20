@@ -56,9 +56,8 @@ def _save_zmean_heatmap(df: pd.DataFrame, cluster_col: str, value_cols: list, ou
     # Order clusters by overall z-mean (row mean) so high-performing clusters
     # appear on top, moderate in the middle, low-performing at the bottom.
     mat = mat.loc[mat.mean(axis=1).sort_values(ascending=False).index]
-    vmax = float(np.nanmax(np.abs(mat.values))) if mat.size else 0.0
-    vmax = max(1.0, min(3.0, vmax))
-    vmin = -vmax
+    vmax = 1.5
+    vmin = -1.5
     n_rows, n_cols = mat.shape
     annot_size = 6
     fig_w = min(4.2, max(3.0, (0.52 * n_cols) + 1.10))
@@ -73,7 +72,7 @@ def _save_zmean_heatmap(df: pd.DataFrame, cluster_col: str, value_cols: list, ou
         annot=True,
         fmt=".2f",
         cbar=True,
-        cbar_kws={"label": "z-mean", "shrink": 0.9, "pad": 0.015, "aspect": 40},
+        cbar_kws={"label": "z-mean", "shrink": 0.9, "pad": 0.015, "aspect": 40, "ticks": [-1, 0, 1]},
         annot_kws={"size": annot_size, "weight": "normal"},
         linewidths=0.4,
         linecolor="#f0f0f0",

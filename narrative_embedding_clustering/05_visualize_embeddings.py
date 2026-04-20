@@ -5,9 +5,6 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from matplotlib.patches import Polygon
-import matplotlib.patheffects as PathEffects
-from scipy.spatial import ConvexHull
 from sklearn.decomposition import PCA
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.manifold import TSNE
@@ -132,125 +129,6 @@ def _plot_scatter(
 
     print(f"Saved {title} plot to {out_path}")
 
-
-def _plot_grouped_hull_scatter(
-    coords: pd.DataFrame,
-    x_col: str,
-    y_col: str,
-    x_label: str,
-    y_label: str,
-    title: str,
-    filename: str,
-) -> None:
-    try:
-        import matplotlib.pyplot as plt
-    except ImportError:
-        return
-
-    fig, ax = plt.subplots(figsize=(10, 8))
-
-    # Define groups
-    groups = {
-        "Mastery Group": [0, 1, 2],
-        "Developing Group": [3, 4, 5],
-        "Struggling Group": [6, 7, 8]
-    }
-    
-    # Draw hulls first (background)
-    for group_name, cluster_ids in groups.items():
-        subset = coords[coords["narrative_best_label"].isin(cluster_ids)]
-        if len(subset) < 3:
-            continue
-            
-        points = subset[[x_col, y_col]].values
-        try:
-            hull = ConvexHull(points)
-            hull_points = points[hull.vertices]
-            
-            # Mimic the yellow highlighter look
-            poly = Polygon(
-                hull_points, 
-                closed=True, 
-                facecolor='none', 
-                edgecolor='yellow', 
-                linewidth=20, 
-                alpha=0.5, 
-                joinstyle='round',
-                capstyle='round'
-            )
-            ax.add_patch(poly)
-            
-            # Add text annotation
-            cx = np.mean(points[:, 0])
-            
-            # Determine placement based on group
-            if "Mastery" in group_name:
-                # Place below
-                cy = np.min(points[:, 1]) - 0.005
-                va = 'top'
-            else:
-                # Place above (Developing and Struggling)
-                cy = np.max(points[:, 1]) + 0.005
-                va = 'bottom'
-            
-            txt = ax.text(
-                cx, cy, group_name, 
-                fontsize=13, 
-                color='blue', 
-                ha='center', 
-                va=va, 
-                weight='bold'
-            )
-            txt.set_path_effects([PathEffects.withStroke(linewidth=2, foreground='white')])
-            
-        except Exception as e:
-            print(f"Could not draw hull for {group_name}: {e}")
-
-    # Draw scatter points
-    # Fixed high-contrast palette (stable mapping: cluster id -> color)
-    # Note: We deliberately map by cluster *id* (0..8) to avoid colormap normalization/ordering issues.
-    cluster_palette = {
-        0: "#0072B2",  # Blue
-        1: "#D55E00",  # Vermillion
-        2: "#009E73",  # Green
-        3: "#CC79A7",  # Purple
-        4: "#999933",  # Olive
-        5: "#56B4E9",  # Sky blue
-        6: "#E69F00",  # Orange
-        7: "#000000",  # Black
-        8: "#999999",  # Grey
-    }
-
-    labels = sorted(coords["narrative_best_label"].dropna().unique())
-    for label in labels:
-        label_int = int(label)
-        subset = coords[coords["narrative_best_label"] == label]
-        ax.scatter(
-            subset[x_col],
-            subset[y_col],
-            color=cluster_palette.get(label_int, "#333333"),
-            s=40,
-            alpha=1.0,
-            edgecolor="white",
-            linewidth=0.5,
-            label=f"Cluster {label_int}",
-        )
-
-    ax.legend(title="Narrative Cluster", bbox_to_anchor=(1.05, 1), loc="upper left")
-
-    ax.set_xlabel(x_label)
-    ax.set_ylabel(y_label)
-    ax.set_title(title)
-    ax.grid(True, alpha=0.2)
-
-    figures_dir = OUTPUT_DIR / "figures"
-    figures_dir.mkdir(parents=True, exist_ok=True)
-    out_path = figures_dir / filename
-    fig.tight_layout()
-    fig.savefig(out_path, dpi=200)
-    plt.close(fig)
-
-    print(f"Saved grouped hull plot to {out_path}")
 
 
 def _enforce_pca_orientation(coords_pca: pd.DataFrame, df_features: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -538,20 +416,7 @@ def main() -> None:
         x_label=f"PC1 ({var_exp[0]:.1%} var)",
         y_label=f"PC3 ({var_exp[2]:.1%} var)",
     )
-    
-    # Final Grouped Plot with Hulls - ONLY for Template A + MiniLM
-    # The user requested this specific visualization only for this configuration
-    if NARRATIVE_TEMPLATE_VERSION == "A" and "MiniLM" in EMBEDDING_MODEL_NAME:
-        _plot_grouped_hull_scatter(
-            coords_pca,
-            x_col="dim1",
-            y_col="dim3",
-            x_label=f"PC1 ({var_exp[0]:.1%} var)",
-            y_label=f"PC3 ({var_exp[2]:.1%} var)",
-            title=f"Narrative Clusters: PC1 vs PC3",
-            filename=make_versioned_filename("embeddings_pca_PC1_vs_PC3_final_hulls.png")
-        )
-    
+
     # Plot 3: PC2 vs PC3
     _plot_scatter(
         coords_pca,

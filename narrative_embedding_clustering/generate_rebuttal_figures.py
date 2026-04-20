@@ -18,6 +18,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
+import matplotlib.lines as mlines
 import seaborn as sns
 
 warnings.filterwarnings("ignore")
@@ -557,9 +558,21 @@ def plot_cluster_profiles(data):
 
 def plot_weight_sensitivity(data):
     sweep = data["sweep"]
-    fig, ax = plt.subplots(figsize=(8, 6))
+    fig, ax = plt.subplots(figsize=(7.5, 5.2))
 
     winners = sweep.copy()
+
+    # Relabel Template → Strategy (Template A→C, B→B, C→A) to match the paper.
+    tmpl_to_strat = {"Template A": "Strategy C",
+                     "Template B": "Strategy B",
+                     "Template C": "Strategy A"}
+    def _relabel(s: str) -> str:
+        for t, st in tmpl_to_strat.items():
+            if s.startswith(t):
+                return s.replace(t, st, 1)
+        return s
+    winners["Top1"] = winners["Top1"].map(_relabel)
+
     labels = sorted(winners["Top1"].unique())
     label_to_code = {lab: i for i, lab in enumerate(labels)}
     winners["code"] = winners["Top1"].map(label_to_code)
@@ -568,11 +581,14 @@ def plot_weight_sensitivity(data):
                                  values="code", aggfunc="first")
     pivot = pivot.sort_index(ascending=False)
 
+    # Distinct, high-contrast palette (one colour per winning Strategy+Model).
     color_map = {
-        "Template A + MiniLM": "#2196F3",
-        "Template A + MPNet": "#64B5F6",
-        "Template B + MiniLM": "#FF9800",
-        "Template B + MPNet": "#FFB74D",
+        "Strategy C + MiniLM": "#1976D2",  # strong blue  — reported winner
+        "Strategy C + MPNet":  "#E53935",  # red
+        "Strategy B + MiniLM": "#43A047",  # green
+        "Strategy B + MPNet":  "#F57C00",  # deep orange
+        "Strategy A + MiniLM": "#8E24AA",  # purple
+        "Strategy A + MPNet":  "#00897B",  # teal
     }
     cmap_colors = [color_map.get(lab, "#BDBDBD") for lab in labels]
 
@@ -593,17 +609,54 @@ def plot_weight_sensitivity(data):
                     ha="center", va="center", fontsize=6.5,
                     color="white", fontweight="bold")
 
+    # Mark the reported weight choice (★) without a label — the star alone
+    # is sufficient and avoids cluttering the plot.
+    try:
+        chosen_row = list(pivot.index).index(0.5)
+        chosen_col = list(pivot.columns).index(0.4)
+        ax.scatter([chosen_col + 0.82], [chosen_row + 0.18],
+                   s=120, marker="*", color="#FFEB3B",
+                   edgecolor="black", linewidth=1.0, zorder=10)
+    except ValueError:
+        pass
+
     ax.set_xlabel("w_Internal")
     ax.set_ylabel("w_Eta")
-    ax.set_title("Weight Sensitivity: Winning Model by Composite Weights\n"
-                 "(Cell text = w_ARI = 1 − w_Eta − w_Internal)",
-                 fontweight="bold")
+    ax.set_title("Weight Sensitivity of Composite Winner  "
+                 "(cell text = w_ARI)",
+                 fontweight="bold", fontsize=10)
 
-    patches = [mpatches.Patch(facecolor=color_map.get(lab, "#BDBDBD"),
-                               edgecolor="gray", label=lab)
-               for lab in labels]
-    ax.legend(handles=patches, loc="upper left", bbox_to_anchor=(1.02, 1),
-              title="Top-1 Model", fontsize=8)
+    # Compact combined legend: colour patches + the ★ marker.
+    all_models = [
+        "Strategy A + MiniLM", "Strategy A + MPNet",
+        "Strategy B + MiniLM", "Strategy B + MPNet",
+        "Strategy C + MiniLM", "Strategy C + MPNet",
+    ]
+    # Keep the fixed Strategy A→B→C, MiniLM→MPNet order (matches the
+    # final_model_comparison heatmap in the paper), do NOT sort by count.
+    counts = winners["Top1"].value_counts().reindex(all_models, fill_value=0)
+    total = int(counts.sum())
+
+    patches = []
+    for lab, cnt in counts.items():
+        appears = cnt > 0
+        patches.append(mpatches.Patch(
+            facecolor=color_map.get(lab, "#BDBDBD"),
+            edgecolor="black", linewidth=0.5,
+            alpha=1.0 if appears else 0.25,
+            label=f"{lab}  {cnt}/{total} ({cnt/total:.0%})",
+        ))
+    star = mlines.Line2D([], [], marker="*", color="#FFEB3B",
+                         markeredgecolor="black", markersize=11, linestyle="",
+                         label="reported (0.5, 0.4, 0.1)")
+    # Park the legend in the empty upper-right triangle of the heatmap
+    # (cells where w_Eta + w_Internal > 1 are excluded by construction).
+    legend = ax.legend(handles=patches + [star], loc="upper right",
+                       bbox_to_anchor=(0.995, 0.995),
+                       title="Models  (winner share across 66 weight cells)",
+                       fontsize=7.5, title_fontsize=8,
+                       framealpha=0.95, edgecolor="black")
+    legend._legend_box.align = "left"
 
     fig.tight_layout()
     out = FIGS_DIR / "fig7_weight_sensitivity.png"

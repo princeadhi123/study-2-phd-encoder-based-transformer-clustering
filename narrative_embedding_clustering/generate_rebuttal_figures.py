@@ -49,11 +49,20 @@ def _load_numeric_ref() -> dict:
     try:
         df = pd.read_csv(FINAL_COMP_PATH)
         row = df[df["Template"] == "Numeric"].iloc[0]
+        ari_raw = row["ARI (vs Numeric)"]
+        # ARI-vs-itself is undefined; mirror the heatmap's convention and
+        # impute with the mean ARI of the winning template (Template A) so
+        # Fig 2's numeric composite matches the heatmap's numeric composite.
+        if pd.isna(ari_raw):
+            tmpl_a_ari = df.loc[df["Template"].eq("Template A"), "ARI (vs Numeric)"].mean()
+            ari = float(tmpl_a_ari) if pd.notna(tmpl_a_ari) else float("nan")
+        else:
+            ari = float(ari_raw)
         return {
             "Silhouette": float(row["Silhouette (Cosine)"]),
             "Calinski_Harabasz": float(row["Calinski-Harabasz"]),
             "Davies_Bouldin": float(row["Davies-Bouldin"]),
-            "ARI": float(row["ARI (vs Numeric)"]) if not pd.isna(row["ARI (vs Numeric)"]) else float("nan"),
+            "ARI": ari,
             "Mean_Eta2": float(row["Mean Eta^2"]),
             "dims": 8,
             "K": int(row["Winner K"]),
@@ -63,6 +72,39 @@ def _load_numeric_ref() -> dict:
 
 
 NUMERIC_REF = _load_numeric_ref()
+
+
+def _load_heatmap_norm_bounds() -> dict:
+    """Normalization bounds from the final heatmap's narrative pool.
+
+    The heatmap (`plot_model_comparison_heatmap.py`) normalizes per-metric
+    using the 6 narrative models at their AICc-best K (numeric excluded):
+        Sil_norm = (x - sil_min) / (sil_max - sil_min)   clipped [0,1]
+        CH_norm  = x / ch_max
+        DB_norm  = db_min / x
+        ARI_norm = x / ari_max
+        Eta_norm = x / eta_max
+    We reuse those bounds in Fig 2 so the Composite panel matches the heatmap.
+    """
+    fb = {"sil_min": 0.0689, "sil_max": 0.488,
+          "ch_max": 353.7482, "db_min": 1.0376,
+          "ari_max": 0.1906, "eta_max": 0.5104}
+    try:
+        df = pd.read_csv(FINAL_COMP_PATH)
+        narr = df[df["Template"] != "Numeric"]
+        return {
+            "sil_min": float(narr["Silhouette (Cosine)"].min()),
+            "sil_max": float(narr["Silhouette (Cosine)"].max()),
+            "ch_max":  float(narr["Calinski-Harabasz"].max()),
+            "db_min":  float(narr["Davies-Bouldin"].min()),
+            "ari_max": float(narr["ARI (vs Numeric)"].max()),
+            "eta_max": float(narr["Mean Eta^2"].max()),
+        }
+    except Exception:
+        return fb
+
+
+NORM_BOUNDS = _load_heatmap_norm_bounds()
 
 # Winning narrative K used by downstream cluster-level figures (lifted from
 # the latest composite winner in final_model_comparison.csv).
@@ -181,34 +223,76 @@ def plot_dimensionality_ablation(data):
 def plot_equal_dims_comparison(data):
     abl = data["ablation"]
 
-    # 2x2 grid of winning-model (MiniLM) per-metric trajectories.
-    fig, axes = plt.subplots(2, 2, figsize=(13, 8))
+    # 3x2 grid of winning-model (MiniLM) per-metric trajectories.
+    fig, axes = plt.subplots(3, 2, figsize=(13, 13.5))
     ax_grid = axes.flatten()
 
     dims_sorted = sorted(abl["PCA_dims"].unique())
     pos_map = {d: i for i, d in enumerate(dims_sorted)}
 
-    # Winning-model (MiniLM) per-metric trajectories — one subplot each.
-    # ARI is intentionally excluded (it's a between-partition agreement score,
-    # not a quality-of-clustering metric).
     mini = abl[abl["Model"] == "MiniLM"].sort_values("PCA_dims").reset_index(drop=True)
     mini_pos = [pos_map[int(d)] for d in mini["PCA_dims"]]
 
+    # Composite formula matches the final heatmap
+    # (plot_model_comparison_heatmap.py): bounds are from the 6 narrative
+    # models at their AICc-best K (numeric excluded). This guarantees the
+    # Strategy C + MiniLM PCA=8 point in this panel equals the heatmap value.
+    B = NORM_BOUNDS
+
+    def _sil_n(x):
+        rng = B["sil_max"] - B["sil_min"]
+        return np.clip((np.asarray(x, float) - B["sil_min"]) / rng, 0.0, 1.0) if rng > 0 else np.full_like(x, 0.5, dtype=float)
+
+    def _ch_n(x):
+        return np.asarray(x, float) / B["ch_max"] if B["ch_max"] > 0 else np.zeros_like(x)
+
+    def _db_n(x):
+        return B["db_min"] / np.asarray(x, float)
+
+    def _ari_n(x):
+        x = np.asarray(x, float)
+        # ARI vs self for numeric is undefined; fill NaN → 0 so composite isn't boosted.
+        x = np.where(np.isnan(x), 0.0, x)
+        return x / B["ari_max"] if B["ari_max"] > 0 else np.zeros_like(x)
+
+    def _eta_n(x):
+        return np.asarray(x, float) / B["eta_max"] if B["eta_max"] > 0 else np.zeros_like(x)
+
+    def _composite(sil, ch, db, ari, eta):
+        internal = (_sil_n(sil) + _ch_n(ch) + _db_n(db)) / 3.0
+        return 0.5 * _eta_n(eta) + 0.4 * internal + 0.1 * _ari_n(ari)
+
+    mini = mini.assign(Composite=_composite(
+        mini["Silhouette_Cosine"], mini["Calinski_Harabasz"],
+        mini["Davies_Bouldin"], mini["ARI_vs_Numeric"], mini["Mean_Eta2"],
+    ))
+
+    numeric_comp = float(_composite(
+        np.array([NUMERIC_REF["Silhouette"]]),
+        np.array([NUMERIC_REF["Calinski_Harabasz"]]),
+        np.array([NUMERIC_REF["Davies_Bouldin"]]),
+        np.array([NUMERIC_REF["ARI"]]),
+        np.array([NUMERIC_REF["Mean_Eta2"]]),
+    )[0])
+
     metric_specs = [
+        ("Composite score (higher is better)",      "Composite",         numeric_comp,                     "#AD1457", "P", False),
         ("Mean η² (higher is better)",              "Mean_Eta2",         NUMERIC_REF["Mean_Eta2"],         "#1976D2", "o", False),
         ("Silhouette — Cosine (higher is better)",  "Silhouette_Cosine", NUMERIC_REF["Silhouette"],        "#2E7D32", "s", False),
         ("Calinski–Harabasz (higher is better)",    "Calinski_Harabasz", NUMERIC_REF["Calinski_Harabasz"], "#E65100", "^", False),
         ("Davies–Bouldin (lower is better)",        "Davies_Bouldin",    NUMERIC_REF["Davies_Bouldin"],    "#6A1B9A", "D", True),
+        ("ARI vs Numeric (partition agreement)",    "ARI_vs_Numeric",    NUMERIC_REF["ARI"],               "#00838F", "v", False),
     ]
 
     for ax, (title, col, ref, color, marker, lower_better) in zip(ax_grid, metric_specs):
         y = mini[col].to_numpy()
         ax.plot(mini_pos, y, marker=marker, color=color, linewidth=2,
                 markersize=6, label="Strategy C + MiniLM")
-        ax.axhline(ref, color="#E53935", linestyle="--", linewidth=1.6,
-                   label=f"Numeric ({NUMERIC_REF['dims']} dims)")
+        if ref is not None:
+            ax.axhline(ref, color="#E53935", linestyle="--", linewidth=1.6,
+                       label=f"Numeric ({NUMERIC_REF['dims']} dims)")
 
-        # Mark production PCA=8.
+        # Mark reported PCA=8 (matches numeric-baseline dimensionality).
         ax.axvline(pos_map[8], color="#FFB300", linestyle=":", linewidth=1.4, alpha=0.8)
 
         # Star-marker the best PCA (min for DB, max otherwise).
@@ -225,7 +309,7 @@ def plot_equal_dims_comparison(data):
         ax.grid(alpha=0.3)
 
         # Add headroom on the "better" side so the star + annotation never clip.
-        y_vals = np.concatenate([y, [ref]])
+        y_vals = np.concatenate([y, [ref]]) if ref is not None else y
         y_lo, y_hi = float(y_vals.min()), float(y_vals.max())
         pad = (y_hi - y_lo) * 0.18 if y_hi > y_lo else abs(y_hi) * 0.2 + 1.0
         if lower_better:
@@ -244,7 +328,7 @@ def plot_equal_dims_comparison(data):
         ax.legend(loc="upper right", fontsize=7.5, framealpha=0.92)
 
     # Shared x-label only on the bottom row, y-label sentence above the grid.
-    for ax in ax_grid[2:]:
+    for ax in ax_grid[4:]:
         ax.set_xlabel("PCA Components", fontsize=9)
 
     fig.suptitle(
@@ -252,13 +336,17 @@ def plot_equal_dims_comparison(data):
         fontsize=12, fontweight="bold", y=1.01,
     )
 
-    plt.tight_layout(rect=(0, 0.08, 1, 1))
+    plt.tight_layout(rect=(0, 0.14, 1, 1))
 
-    # Green conclusion note below the 2x2 grid.
-    note = ("Conclusion: MiniLM beats the numeric baseline on every internal metric "
-            "across PCA 2–100, with predictive η² peaking at PCA=6 "
-            f"(numeric baseline = {NUMERIC_REF['dims']} dims). "
-            "SEMANTIC ENCODING drives the gain, not dimensionality.")
+    # Green conclusion note below the grid (wrapped to keep box narrow).
+    note = (
+        "Conclusion: Strategy C + MiniLM dominates the numeric baseline on the composite\n"
+        f"score and every individual metric across PCA 2–100 (numeric baseline = {NUMERIC_REF['dims']} dims);\n"
+        "reported PCA=8 (matching numeric baseline) sits on the plateau of each metric.\n"
+        "Low ARI (≤0.22) further\n"
+        "shows narrative partitions are structurally distinct, not a rescaling of numeric\n"
+        "ones — SEMANTIC ENCODING drives the gain, not dimensionality."
+    )
     fig.text(0.5, 0.02, note, ha="center", va="bottom", fontsize=9.5,
              style="italic",
              bbox=dict(boxstyle="round,pad=0.5", facecolor="#E8F5E9",

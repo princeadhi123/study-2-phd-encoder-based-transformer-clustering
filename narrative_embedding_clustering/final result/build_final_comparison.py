@@ -31,16 +31,37 @@ def get_template_suffix(t: str) -> str:
 
 
 def winner_from_model_results(template: str, embedding_id: str) -> dict:
-    """Find the AICc-best model row and return K, cov, sil, CH, DB."""
+    """Find the AICc-best model row and return K, cov, sil, CH, DB.
+
+    NOTE: `model_results_narrative*.csv` stores Euclidean silhouette (default
+    sklearn metric). The true COSINE silhouette against the winner label is
+    computed in 04_compare_with_gmm_bic.py and written to
+    `gmm_vs_narrative_metrics*.csv` under metric='silhouette_cosine' /
+    baseline='narrative_best_label'. We pull that value here so the CSV/heatmap
+    column "Silhouette (Cosine)" is actually cosine.
+    """
     suffix = get_template_suffix(template)
     path = OUTPUT_ROOT / f"template_{template}" / embedding_id / f"model_results_narrative{suffix}.csv"
     df = pd.read_csv(path)
     # Pick row with lowest AICc
     best = df.loc[df["aicc"].idxmin()]
+
+    sil_cosine = float("nan")
+    metrics_path = OUTPUT_ROOT / f"template_{template}" / embedding_id / f"gmm_vs_narrative_metrics{suffix}.csv"
+    if metrics_path.exists():
+        mdf = pd.read_csv(metrics_path)
+        row = mdf[(mdf["baseline"] == "narrative_best_label") &
+                  (mdf["metric"] == "silhouette_cosine")]
+        if not row.empty:
+            sil_cosine = float(row["value"].iloc[0])
+    if np.isnan(sil_cosine):
+        # Fallback: Euclidean value from the grid (mislabelled but at least numeric).
+        sil_cosine = float(best["silhouette"])
+
     return {
         "K": int(best["K"]),
         "cov": str(best["covariance_type"]),
-        "silhouette": float(best["silhouette"]),
+        "silhouette": sil_cosine,
         "ch": float(best["calinski_harabasz"]),
         "db": float(best["davies_bouldin"]),
     }

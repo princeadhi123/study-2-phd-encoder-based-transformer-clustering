@@ -240,28 +240,35 @@ def plot_equal_dims_comparison(data):
     # Strategy C + MiniLM PCA=8 point in this panel equals the heatmap value.
     B = NORM_BOUNDS
 
+    # All normalised metrics are clipped to [0, 1] so PCA-sweep values that
+    # exceed the 6-model bounds (e.g. CH at PCA=2) cannot inflate the composite.
     def _sil_n(x):
         rng = B["sil_max"] - B["sil_min"]
         return np.clip((np.asarray(x, float) - B["sil_min"]) / rng, 0.0, 1.0) if rng > 0 else np.full_like(x, 0.5, dtype=float)
 
     def _ch_n(x):
-        return np.asarray(x, float) / B["ch_max"] if B["ch_max"] > 0 else np.zeros_like(x)
+        v = np.asarray(x, float) / B["ch_max"] if B["ch_max"] > 0 else np.zeros_like(x)
+        return np.clip(v, 0.0, 1.0)
 
     def _db_n(x):
-        return B["db_min"] / np.asarray(x, float)
+        v = B["db_min"] / np.asarray(x, float)
+        return np.clip(v, 0.0, 1.0)
 
     def _ari_n(x):
         x = np.asarray(x, float)
         # ARI vs self for numeric is undefined; fill NaN → 0 so composite isn't boosted.
         x = np.where(np.isnan(x), 0.0, x)
-        return x / B["ari_max"] if B["ari_max"] > 0 else np.zeros_like(x)
+        v = x / B["ari_max"] if B["ari_max"] > 0 else np.zeros_like(x)
+        return np.clip(v, 0.0, 1.0)
 
     def _eta_n(x):
-        return np.asarray(x, float) / B["eta_max"] if B["eta_max"] > 0 else np.zeros_like(x)
+        v = np.asarray(x, float) / B["eta_max"] if B["eta_max"] > 0 else np.zeros_like(x)
+        return np.clip(v, 0.0, 1.0)
 
     def _composite(sil, ch, db, ari, eta):
         internal = (_sil_n(sil) + _ch_n(ch) + _db_n(db)) / 3.0
-        return 0.5 * _eta_n(eta) + 0.4 * internal + 0.1 * _ari_n(ari)
+        w = 1.0 / 3.0
+        return w * _eta_n(eta) + w * internal + w * _ari_n(ari)
 
     mini = mini.assign(Composite=_composite(
         mini["Silhouette_Cosine"], mini["Calinski_Harabasz"],

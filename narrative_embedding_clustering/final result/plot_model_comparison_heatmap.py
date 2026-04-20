@@ -118,10 +118,11 @@ def plot_heatmap(df):
     ) / 3
     
     # Composite Score calculation
-    # Weights: 50% Eta, 40% Internal, 10% ARI
-    df_norm["Composite"] = (0.5 * df_norm["Eta_Norm"]) + \
-                           (0.4 * df_norm["Internal Score"]) + \
-                           (0.1 * df_norm["ARI_Norm"])
+    # Weights: equal (1/3 each) across Eta, Internal, and ARI
+    w_eta = w_int = w_ari = 1.0 / 3.0
+    df_norm["Composite"] = (w_eta * df_norm["Eta_Norm"]) + \
+                           (w_int * df_norm["Internal Score"]) + \
+                           (w_ari * df_norm["ARI_Norm"])
     
     # Select columns to plot
     cols_to_plot = [

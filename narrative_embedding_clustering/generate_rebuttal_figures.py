@@ -609,17 +609,6 @@ def plot_weight_sensitivity(data):
                     ha="center", va="center", fontsize=6.5,
                     color="white", fontweight="bold")
 
-    # Mark the reported weight choice (★) without a label — the star alone
-    # is sufficient and avoids cluttering the plot.
-    try:
-        chosen_row = list(pivot.index).index(0.5)
-        chosen_col = list(pivot.columns).index(0.4)
-        ax.scatter([chosen_col + 0.82], [chosen_row + 0.18],
-                   s=120, marker="*", color="#FFEB3B",
-                   edgecolor="black", linewidth=1.0, zorder=10)
-    except ValueError:
-        pass
-
     ax.set_xlabel("w_Internal")
     ax.set_ylabel("w_Eta")
     ax.set_title("Weight Sensitivity of Composite Winner  "
@@ -646,12 +635,9 @@ def plot_weight_sensitivity(data):
             alpha=1.0 if appears else 0.25,
             label=f"{lab}  {cnt}/{total} ({cnt/total:.0%})",
         ))
-    star = mlines.Line2D([], [], marker="*", color="#FFEB3B",
-                         markeredgecolor="black", markersize=11, linestyle="",
-                         label="reported (0.5, 0.4, 0.1)")
     # Park the legend in the empty upper-right triangle of the heatmap
     # (cells where w_Eta + w_Internal > 1 are excluded by construction).
-    legend = ax.legend(handles=patches + [star], loc="upper right",
+    legend = ax.legend(handles=patches, loc="upper right",
                        bbox_to_anchor=(0.995, 0.995),
                        title="Models  (winner share across 66 weight cells)",
                        fontsize=7.5, title_fontsize=8,

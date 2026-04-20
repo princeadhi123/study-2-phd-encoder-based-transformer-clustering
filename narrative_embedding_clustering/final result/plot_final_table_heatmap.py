@@ -8,7 +8,7 @@ from decimal import Decimal, ROUND_HALF_UP
 # Configuration
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 INPUT_FILE = PROJECT_ROOT / "narrative_embedding_clustering" / "final result" / "final_model_comparison.csv"
-OUTPUT_FILE = PROJECT_ROOT / "figures" / "final_model_comparison_heatmap.png"
+OUTPUT_FILE = PROJECT_ROOT / "narrative_embedding_clustering" / "final result" / "final_model_comparison_heatmap.png"
 
 def normalize_column(series, invert=False):
     """Normalize a pandas series to 0-1 range. 

@@ -52,7 +52,10 @@ def _save_zmean_heatmap(df: pd.DataFrame, cluster_col: str, value_cols: list, ou
         return
         
     z = _zmean(df[value_cols])
-    mat = z.join(df[cluster_col]).groupby(cluster_col)[value_cols].mean().sort_index()
+    mat = z.join(df[cluster_col]).groupby(cluster_col)[value_cols].mean()
+    # Order clusters by overall z-mean (row mean) so high-performing clusters
+    # appear on top, moderate in the middle, low-performing at the bottom.
+    mat = mat.loc[mat.mean(axis=1).sort_values(ascending=False).index]
     vmax = float(np.nanmax(np.abs(mat.values))) if mat.size else 0.0
     vmax = max(1.0, min(3.0, vmax))
     vmin = -vmax

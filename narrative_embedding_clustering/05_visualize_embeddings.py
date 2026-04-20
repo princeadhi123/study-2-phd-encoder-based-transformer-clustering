@@ -264,18 +264,18 @@ def _enforce_pca_orientation(coords_pca: pd.DataFrame, df_features: pd.DataFrame
         coords_pca: The dataframe with potentially flipped PC columns
         loadings: The correlation matrix (transposed for plotting)
     """
-    # Feature Map (Internal Name -> Display Name)
+    # Feature Map (Internal Name -> Display Name). Must mirror the canonical
+    # 8-feature set used in build_final_comparison.py / reviewer_ablation.py /
+    # the narrative builder, so the PCA-loadings heatmap reports *all* inputs.
     feature_map = {
-        "total_correct": "Total Correct",
-        "total_incorrect": "Total Incorrect",
+        "n_items": "Items Attempted",
         "accuracy": "Accuracy",
         "consecutive_correct_rate": "Consec. Correct Rate",
-        "longest_incorrect_streak": "Max Incorrect Streak",
-        "response_variance": "Response Variance",
         "longest_correct_streak": "Max Correct Streak",
+        "longest_incorrect_streak": "Max Incorrect Streak",
+        "avg_rt": "Avg Response Time",
         "var_rt": "RT Variance",
         "rt_cv": "RT Coeff. Variation",
-        "avg_rt": "Avg Response Time"
     }
 
     # Merge PCA coords with features
@@ -303,10 +303,12 @@ def _enforce_pca_orientation(coords_pca: pd.DataFrame, df_features: pd.DataFrame
             coords_pca["dim1"] *= -1
             raw_loadings["dim1"] *= -1
 
-    # PC2 Anchor: Response Variance should be Negative ( < 0 )
-    if "dim2" in pca_cols and "response_variance" in valid_cols:
-        if raw_loadings.loc["response_variance", "dim2"] > 0:
-            print("  -> Flipping PC2 sign (forcing High Variance to Negative)")
+    # PC2 Anchor: RT Variance should be Negative ( < 0 ). `var_rt` is the
+    # canonical response-time variance feature (was previously mis-named
+    # `response_variance`, which does not exist in the feature matrix).
+    if "dim2" in pca_cols and "var_rt" in valid_cols:
+        if raw_loadings.loc["var_rt", "dim2"] > 0:
+            print("  -> Flipping PC2 sign (forcing High RT Variance to Negative)")
             coords_pca["dim2"] *= -1
             raw_loadings["dim2"] *= -1
             
@@ -325,11 +327,11 @@ def _enforce_pca_orientation(coords_pca: pd.DataFrame, df_features: pd.DataFrame
     final_loadings = raw_loadings.T
     final_loadings = final_loadings.rename(columns=feature_map)
 
-    # Reorder columns
+    # Reorder columns (performance block first, then streaks, then timing).
     desired_order = [
-        "Total Correct", "Total Incorrect", "Accuracy", "Consec. Correct Rate",
-        "Max Incorrect Streak", "Response Variance", "Max Correct Streak",
-        "RT Variance", "RT Coeff. Variation", "Avg Response Time"
+        "Items Attempted", "Accuracy", "Consec. Correct Rate",
+        "Max Correct Streak", "Max Incorrect Streak",
+        "Avg Response Time", "RT Variance", "RT Coeff. Variation",
     ]
     plot_cols = [c for c in desired_order if c in final_loadings.columns]
     final_loadings = final_loadings[plot_cols]
@@ -349,18 +351,29 @@ def _plot_pca_heatmap(loadings: pd.DataFrame) -> None:
         print("seaborn not installed, skipping heatmap.")
         return
 
+    # Features with zero variance (e.g. n_items = 57 for every student) have
+    # undefined Pearson correlations with the PCs. Show them explicitly as
+    # zero-loading columns tagged "(const.)" so the reader sees all analysis
+    # inputs rather than having them silently disappear.
+    const_mask = loadings.isna().all(axis=0)
+    if const_mask.any():
+        const_cols = loadings.columns[const_mask]
+        loadings = loadings.copy()
+        loadings[const_cols] = 0.0
+        loadings = loadings.rename(columns={c: f"{c}\n(const.)" for c in const_cols})
+
     fig, ax = plt.subplots(figsize=(14, 5))
     sns.heatmap(
-        loadings, 
-        annot=True, 
-        cmap="coolwarm", 
-        center=0, 
-        vmin=-1, 
-        vmax=1, 
-        ax=ax, 
+        loadings,
+        annot=True,
+        cmap="coolwarm",
+        center=0,
+        vmin=-1,
+        vmax=1,
+        ax=ax,
         fmt=".2f",
         linewidths=0.5,
-        cbar_kws={"label": "Correlation"}
+        cbar_kws={"label": "Correlation"},
     )
     ax.set_title("PCA Loadings: Feature Contributions to Axes", fontsize=14, pad=15)
     

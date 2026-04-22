@@ -282,3 +282,22 @@ CLUSTER 9  (n=27 students)
   → SELECTED: 'long correct streak'  [Reason: correct streak is significant (moderate+long = 85.2% beats short 14.8%); incorrect streaks are mostly short (74.1% vs 25.9% moderate+long)]
 
   ★ FINAL KEYWORD: "With medium accuracy, responses are moderate, mixed timing variability, long correct streak"
+
+
+========================================================================
+FINAL KEYWORD SUMMARY TABLE
+========================================================================
+
+Cluster    Keywords
+------------------------------------------------------------------------
+0          With low accuracy, responses are slow, moderately variable in timing, long incorrect streak
+1          With medium accuracy, responses are slow, highly variable in timing, long incorrect streak
+2          With medium accuracy, responses are mixed speed, mixed timing variability, long correct streak
+3          With low accuracy, responses are mixed speed, mixed timing variability, long incorrect streak
+4          With medium accuracy, responses are moderate, moderately variable in timing, long incorrect streak
+5          With medium accuracy, responses are mixed speed, mixed timing variability, long incorrect streak
+6          With medium accuracy, responses are moderate, highly variable in timing, moderate correct streak
+7          With medium accuracy, responses are mixed speed, mixed timing variability, long correct streak
+8          With low accuracy, responses are slow, mixed timing variability, long incorrect streak
+9          With medium accuracy, responses are moderate, mixed timing variability, long correct streak
+========================================================================

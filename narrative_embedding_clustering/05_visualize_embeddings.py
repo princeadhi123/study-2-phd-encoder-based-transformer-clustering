@@ -479,21 +479,26 @@ def main() -> None:
         )
 
     # --- t-SNE projection (narrative clusters only) ---
-    tsne = TSNE(n_components=2, random_state=42, init="pca", learning_rate="auto")
+    tsne = TSNE(n_components=2, random_state=42, init="pca", learning_rate="auto", perplexity=30)
     X_tsne = tsne.fit_transform(X)
     coords_tsne = coords.copy()
     coords_tsne["dim1"] = X_tsne[:, 0]
     coords_tsne["dim2"] = X_tsne[:, 1]
 
+    tsne_labels = coords_tsne["narrative_best_label"].dropna()
+    tsne_sil = silhouette_score(X_tsne, tsne_labels)
+    kl_div = tsne.kl_divergence_
+    print(f"t-SNE Silhouette={tsne_sil:.3f}, KL Divergence={kl_div:.4f}")
+
     _plot_scatter(
         coords_tsne,
         color_col="narrative_best_label",
-        title="Narrative GMM-BIC clusters (embedding t-SNE)",
+        title=f"Narrative Clusters (t-SNE)  Sil={tsne_sil:.2f}  KL={kl_div:.2f}",
         filename=make_versioned_filename("embeddings_tsne_narrative_clusters.png"),
         x_col="dim1",
         y_col="dim2",
-        x_label="t-SNE1 (narrative embeddings)",
-        y_label="t-SNE2 (narrative embeddings)",
+        x_label=f"t-SNE1  (perplexity=30, KL={kl_div:.2f})",
+        y_label=f"t-SNE2  (silhouette={tsne_sil:.2f})",
     )
 
     # --- LDA projection (supervised by narrative clusters) ---

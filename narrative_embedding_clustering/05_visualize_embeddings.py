@@ -497,8 +497,11 @@ def main() -> None:
     )
 
     # --- LDA projection (supervised by narrative clusters) ---
+    # Pre-reduce with PCA to avoid degeneracy on raw 384-d input:
+    # LDA on high-d embeddings lets 1-2 outlier clusters dominate all discriminant
+    # variance, compressing everything else to a vertical strip.
+    # Reducing to min(n_samples-1, n_classes*6, 50) dims first stabilises the axes.
     y = coords["narrative_best_label"].to_numpy()
-    # Remove any NaN labels if they exist
     mask = ~np.isnan(y)
     if not mask.all():
         y = y[mask]
@@ -507,25 +510,34 @@ def main() -> None:
         X_for_lda = X
 
     n_classes = len(np.unique(y))
-    
+
     if n_classes < 3:
         print(f"Skipping LDA plot: Requires at least 3 clusters for 2D projection (found {n_classes}).")
     else:
+        n_pre = min(X_for_lda.shape[0] - 1, n_classes * 6, 50)
+        pca_pre = PCA(n_components=n_pre, random_state=42)
+        X_pre = pca_pre.fit_transform(X_for_lda)
+
         lda = LinearDiscriminantAnalysis(n_components=2)
-        X_lda = lda.fit_transform(X_for_lda, y)
-        coords_lda = coords.copy()
+        X_lda = lda.fit_transform(X_pre, y)
+
+        # Standardise each axis to unit variance so neither LD dominates visually
+        X_lda = X_lda / (X_lda.std(axis=0) + 1e-9)
+
+        coords_lda = coords[mask].copy() if not mask.all() else coords.copy()
         coords_lda["dim1"] = X_lda[:, 0]
         coords_lda["dim2"] = X_lda[:, 1]
 
+        expl = lda.explained_variance_ratio_
         _plot_scatter(
             coords_lda,
             color_col="narrative_best_label",
-            title="Narrative GMM-BIC clusters (embedding LDA)",
+            title=f"Narrative Clusters (LDA): LD1={expl[0]:.1%}  LD2={expl[1]:.1%}",
             filename=make_versioned_filename("embeddings_lda_narrative_clusters.png"),
             x_col="dim1",
             y_col="dim2",
-            x_label="LDA1 (narrative embeddings)",
-            y_label="LDA2 (narrative embeddings)",
+            x_label=f"LD1 ({expl[0]:.1%} between-cluster var)",
+            y_label=f"LD2 ({expl[1]:.1%} between-cluster var)",
         )
 
 

@@ -1,3 +1,4 @@
+import math
 import re
 from pathlib import Path
 import numpy as np
@@ -13,6 +14,7 @@ from sklearn.metrics import (
 from scipy.stats import f as f_dist
 
 from config import (
+    DERIVED_FEATURES_PATH,
     MARKS_WITH_CLUSTERS_PATH,
     NARRATIVE_TEMPLATE_VERSION,
     OUTPUT_DIR,
@@ -112,34 +114,83 @@ def _pct(count: int, total: int) -> str:
     return f"{100 * count / total:.1f}%" if total > 0 else "0.0%"
 
 
-def save_cluster_keywords(df: pd.DataFrame, text_col: str, cluster_col: str, top_n: int = 3) -> None:
-    clusters = sorted(df[cluster_col].unique())
+def _compute_thresholds(series: pd.Series, method: str = "quantile",
+                         abs_low: float | None = None, abs_high: float | None = None) -> tuple[float, float]:
+    """Replicates the thresholding logic of 01_build_narratives.py so categories
+    derived here match those that were embedded in the narrative text."""
+    s = series.replace([np.inf, -np.inf], np.nan).dropna()
+    if s.empty:
+        return 0.0, 0.0
+    if method == "absolute" and abs_low is not None and abs_high is not None:
+        return abs_low, abs_high
+    low = float(s.quantile(0.33))
+    high = float(s.quantile(0.67))
+    if math.isclose(low, high):
+        high = float(s.max())
+    return low, high
 
-    PHRASES = {
-        'Accuracy': [
-            'high accuracy',
-            'medium accuracy',
-            'low accuracy',
-        ],
-        'Speed': [
-            'responses are fast',
-            'responses are moderate',
-            'responses are slow',
-        ],
-        'Timing': [
-            'stable in timing',
-            'moderately variable in timing',
-            'highly variable in timing',
-        ],
-        'Streak': [
-            'short longest correct streak',
-            'moderate longest correct streak',
-            'long longest correct streak',
-            'short longest incorrect streak',
-            'moderate longest incorrect streak',
-            'long longest incorrect streak',
-        ],
-    }
+
+def _categorise(value: float, low: float, high: float,
+                 low_label: str, mid_label: str, high_label: str) -> str:
+    if pd.isna(value):
+        return "unknown"
+    if value <= low:
+        return low_label
+    if value >= high:
+        return high_label
+    return mid_label
+
+
+def _build_categories(features_df: pd.DataFrame) -> pd.DataFrame:
+    """Compute per-student categorical labels from numeric features using the
+    same thresholds as narrative construction. Returns a frame with IDCode +
+    acc_cat / speed_cat / timing_cat / streak_correct_cat / streak_incorrect_cat.
+    Template-independent: these columns drive the keyword extractor regardless
+    of which narrative template (A, B, or C) was used for embedding."""
+    feats = features_df.copy()
+    with np.errstate(divide="ignore", invalid="ignore"):
+        if "accuracy" not in feats.columns and "total_correct" in feats.columns:
+            feats["accuracy"] = feats["total_correct"] / feats["n_items"].replace(0, np.nan)
+        if "rt_cv" not in feats.columns and "var_rt" in feats.columns and "avg_rt" in feats.columns:
+            std_rt = np.sqrt(feats["var_rt"].clip(lower=0.0))
+            feats["rt_cv"] = std_rt / feats["avg_rt"].replace(0, np.nan)
+    for col in ["accuracy", "avg_rt", "var_rt", "longest_correct_streak", "longest_incorrect_streak"]:
+        if col in feats.columns:
+            median_val = feats[col].median()
+            if pd.isna(median_val):
+                median_val = 0.0
+            feats[col] = feats[col].fillna(median_val)
+
+    acc_low, acc_high = _compute_thresholds(feats["accuracy"], method="absolute", abs_low=0.60, abs_high=0.85)
+    rt_low, rt_high   = _compute_thresholds(feats["avg_rt"])
+    var_low, var_high = _compute_thresholds(feats["var_rt"])
+    lc_low, lc_high   = _compute_thresholds(feats["longest_correct_streak"])
+    li_low, li_high   = _compute_thresholds(feats["longest_incorrect_streak"])
+
+    feats["acc_cat"]              = feats["accuracy"].apply(lambda v: _categorise(v, acc_low, acc_high, "low", "medium", "high"))
+    feats["speed_cat"]            = feats["avg_rt"].apply(lambda v: _categorise(v, rt_low, rt_high, "fast", "moderate", "slow"))
+    feats["timing_cat"]           = feats["var_rt"].apply(lambda v: _categorise(v, var_low, var_high, "stable", "moderately variable", "highly variable"))
+    feats["streak_correct_cat"]   = feats["longest_correct_streak"].apply(lambda v: _categorise(v, lc_low, lc_high, "short", "moderate", "long"))
+    feats["streak_incorrect_cat"] = feats["longest_incorrect_streak"].apply(lambda v: _categorise(v, li_low, li_high, "short", "moderate", "long"))
+    return feats[["IDCode", "acc_cat", "speed_cat", "timing_cat", "streak_correct_cat", "streak_incorrect_cat"]]
+
+
+def save_cluster_keywords(df: pd.DataFrame, cluster_col: str) -> None:
+    """Generate cluster keyword report from pre-computed categorical labels.
+
+    Expected columns on df: acc_cat, speed_cat, timing_cat,
+    streak_correct_cat, streak_incorrect_cat plus the cluster column.
+
+    This function is template-independent — results depend only on the
+    categorised numeric features, not on the narrative phrasing, so the
+    same logic produces identical keywords for Templates A, B, and C
+    (they describe the same 537 students in different words)."""
+    clusters = sorted(df[cluster_col].unique())
+    _GAP_THRESHOLD = 0.15
+
+    def _counts(series: pd.Series, levels: list[str]) -> dict[str, int]:
+        vc = series.value_counts().to_dict()
+        return {lvl: int(vc.get(lvl, 0)) for lvl in levels}
 
     rows = []
     report_lines = [
@@ -151,151 +202,150 @@ def save_cluster_keywords(df: pd.DataFrame, text_col: str, cluster_col: str, top
     ]
 
     for cluster_label in clusters:
-        sub_df = df[df[cluster_col] == cluster_label]
-        combined_text = " ".join(sub_df[text_col].astype(str).tolist())
-        n_students = len(sub_df)
-
-        cluster_parts = []
+        sub = df[df[cluster_col] == cluster_label]
+        n_students = len(sub)
+        cluster_parts: list[str] = []
         cluster_report = [
             f"CLUSTER {int(cluster_label)}  (n={n_students} students)",
             "-" * 50,
         ]
 
         # ── 1. Accuracy ──────────────────────────────────────────────────────
-        acc_counts = {p: combined_text.count(p) for p in PHRASES['Accuracy']}
-        total_acc = sum(acc_counts.values()) or 1
-        high_n = acc_counts['high accuracy']
-        med_n  = acc_counts['medium accuracy']
-        low_n  = acc_counts['low accuracy']
-        best_acc = max(acc_counts, key=acc_counts.get)
-
+        acc = _counts(sub["acc_cat"], ["high", "medium", "low"])
+        best_acc = max(acc, key=acc.get)
         cluster_report.append("  [Accuracy]")
-        for p, c in acc_counts.items():
-            cluster_report.append(f"    {p:30s}: {c:3d} students  ({_pct(c, n_students)})")
+        for lvl in ["high", "medium", "low"]:
+            label = f"{lvl} accuracy"
+            cluster_report.append(f"    {label:30s}: {acc[lvl]:3d} students  ({_pct(acc[lvl], n_students)})")
 
-        if high_n > 0 and med_n > 0 and min(high_n, med_n) / max(high_n, med_n) >= 0.50:
+        if acc["high"] > 0 and acc["medium"] > 0 and min(acc["high"], acc["medium"]) / max(acc["high"], acc["medium"]) >= 0.50:
             clean_acc = "With medium-to-high accuracy"
             cluster_report.append(
                 f"  → SELECTED: '{clean_acc}'  "
-                f"[Reason: high ({_pct(high_n, n_students)}) and medium ({_pct(med_n, n_students)}) "
+                f"[Reason: high ({_pct(acc['high'], n_students)}) and medium ({_pct(acc['medium'], n_students)}) "
                 f"are within 50% of each other — mixed accuracy cluster]"
             )
         else:
-            clean_acc = "With " + best_acc
+            clean_acc = f"With {best_acc} accuracy"
             cluster_report.append(
                 f"  → SELECTED: '{clean_acc}'  "
-                f"[Reason: dominant label ({_pct(acc_counts[best_acc], n_students)} of students)]"
+                f"[Reason: dominant label ({_pct(acc[best_acc], n_students)} of students)]"
             )
         cluster_parts.append(clean_acc)
 
         # ── 2. Speed ─────────────────────────────────────────────────────────
-        # Mixed if the gap between the top two options is ≤15 percentage points
-        # (catches genuine 50/50 splits without penalising near-dominant 59/41 splits)
-        _GAP_THRESHOLD = 0.15
-        speed_counts = {p: combined_text.count(p) for p in PHRASES['Speed']}
-        sorted_speed = sorted(speed_counts.values(), reverse=True)
-        speed_top_pct  = sorted_speed[0] / n_students
-        speed_sec_pct  = sorted_speed[1] / n_students if len(sorted_speed) > 1 else 0.0
-        best_speed = max(speed_counts, key=speed_counts.get)
-
+        speed = _counts(sub["speed_cat"], ["fast", "moderate", "slow"])
         cluster_report.append("  [Speed]")
-        for p, c in speed_counts.items():
-            cluster_report.append(f"    {p:30s}: {c:3d} students  ({_pct(c, n_students)})")
-        if (speed_top_pct - speed_sec_pct) >= _GAP_THRESHOLD:
-            speed_label = best_speed
-            speed_diff_pts = round(speed_top_pct * 100, 1) - round(speed_sec_pct * 100, 1)
+        for lvl in ["fast", "moderate", "slow"]:
+            label = f"responses are {lvl}"
+            cluster_report.append(f"    {label:30s}: {speed[lvl]:3d} students  ({_pct(speed[lvl], n_students)})")
+        sorted_v = sorted(speed.values(), reverse=True)
+        top_pct = sorted_v[0] / n_students if n_students else 0.0
+        sec_pct = sorted_v[1] / n_students if n_students and len(sorted_v) > 1 else 0.0
+        best_speed = max(speed, key=speed.get)
+        if (top_pct - sec_pct) >= _GAP_THRESHOLD:
+            speed_label = f"responses are {best_speed}"
+            diff = round(top_pct * 100, 1) - round(sec_pct * 100, 1)
             speed_reason = (
-                f"clear winner '{best_speed}' ({_pct(speed_counts[best_speed], n_students)}) "
-                f"leads 2nd place by {speed_diff_pts:.1f}% pts"
+                f"clear winner '{speed_label}' ({_pct(speed[best_speed], n_students)}) "
+                f"leads 2nd place by {diff:.1f}% pts"
             )
         else:
             speed_label = "responses are mixed speed"
             speed_reason = (
                 f"top two options within {_GAP_THRESHOLD*100:.0f}pp of each other "
-                f"('{best_speed}' at {_pct(speed_counts[best_speed], n_students)} vs 2nd at {speed_sec_pct*100:.1f}%)"
+                f"('responses are {best_speed}' at {_pct(speed[best_speed], n_students)} vs 2nd at {sec_pct*100:.1f}%)"
             )
         cluster_report.append(f"  → SELECTED: '{speed_label}'  [Reason: {speed_reason}]")
         cluster_parts.append(speed_label)
 
-        # ── 3. Timing variability ─────────────────────────────────────────────
-        # Same gap rule: mixed if top two timing options are within 15pp
-        timing_counts = {p: combined_text.count(p) for p in PHRASES['Timing']}
-        sorted_timing = sorted(timing_counts.values(), reverse=True)
-        timing_top_pct = sorted_timing[0] / n_students
-        timing_sec_pct = sorted_timing[1] / n_students if len(sorted_timing) > 1 else 0.0
-        best_timing = max(timing_counts, key=timing_counts.get)
-
+        # ── 3. Timing variability ────────────────────────────────────────────
+        timing_levels = ["stable", "moderately variable", "highly variable"]
+        timing = _counts(sub["timing_cat"], timing_levels)
         cluster_report.append("  [Timing Variability]")
-        for p, c in timing_counts.items():
-            cluster_report.append(f"    {p:35s}: {c:3d} students  ({_pct(c, n_students)})")
-        if (timing_top_pct - timing_sec_pct) >= _GAP_THRESHOLD:
-            timing_label = best_timing
-            timing_diff_pts = round(timing_top_pct * 100, 1) - round(timing_sec_pct * 100, 1)
+        for lvl in timing_levels:
+            label = f"{lvl} in timing"
+            cluster_report.append(f"    {label:35s}: {timing[lvl]:3d} students  ({_pct(timing[lvl], n_students)})")
+        sorted_v = sorted(timing.values(), reverse=True)
+        top_pct = sorted_v[0] / n_students if n_students else 0.0
+        sec_pct = sorted_v[1] / n_students if n_students and len(sorted_v) > 1 else 0.0
+        best_timing = max(timing, key=timing.get)
+        if (top_pct - sec_pct) >= _GAP_THRESHOLD:
+            timing_label = f"{best_timing} in timing"
+            diff = round(top_pct * 100, 1) - round(sec_pct * 100, 1)
             timing_reason = (
-                f"clear winner '{best_timing}' ({_pct(timing_counts[best_timing], n_students)}) "
-                f"leads 2nd place by {timing_diff_pts:.1f}% pts"
+                f"clear winner '{timing_label}' ({_pct(timing[best_timing], n_students)}) "
+                f"leads 2nd place by {diff:.1f}% pts"
             )
         else:
             timing_label = "mixed timing variability"
             timing_reason = (
                 f"top two options within {_GAP_THRESHOLD*100:.0f}pp of each other "
-                f"('{best_timing}' at {_pct(timing_counts[best_timing], n_students)} vs 2nd at {timing_sec_pct*100:.1f}%)"
+                f"('{best_timing} in timing' at {_pct(timing[best_timing], n_students)} vs 2nd at {sec_pct*100:.1f}%)"
             )
         cluster_report.append(f"  → SELECTED: '{timing_label}'  [Reason: {timing_reason}]")
         cluster_parts.append(timing_label)
 
-        # ── 4. Streak ─────────────────────────────────────────────────────────
-        streak_counts = {p: combined_text.count(p) for p in PHRASES['Streak']}
-        correct_streaks  = {k: v for k, v in streak_counts.items() if 'correct streak'  in k and 'incorrect' not in k}
-        incorrect_streaks = {k: v for k, v in streak_counts.items() if 'incorrect streak' in k}
+        # ── 4. Streak ────────────────────────────────────────────────────────
+        cor = _counts(sub["streak_correct_cat"],   ["short", "moderate", "long"])
+        inc = _counts(sub["streak_incorrect_cat"], ["short", "moderate", "long"])
+        cluster_report.append("  [Streak]")
+        for lvl in ["short", "moderate", "long"]:
+            label = f"{lvl} correct streak"
+            cluster_report.append(f"    {label:40s}: {cor[lvl]:3d}  ({_pct(cor[lvl], n_students)})")
+        for lvl in ["short", "moderate", "long"]:
+            label = f"{lvl} incorrect streak"
+            cluster_report.append(f"    {label:40s}: {inc[lvl]:3d}  ({_pct(inc[lvl], n_students)})")
 
-        best_correct_p   = max(correct_streaks,   key=correct_streaks.get)   if correct_streaks   else None
-        best_incorrect_p = max(incorrect_streaks, key=incorrect_streaks.get) if incorrect_streaks else None
+        cor_sig_n = cor["moderate"] + cor["long"]
+        inc_sig_n = inc["moderate"] + inc["long"]
+        cor_sig_label = "long correct streak" if cor["long"] >= cor["moderate"] else "moderate correct streak"
+        inc_sig_label = "long incorrect streak" if inc["long"] >= inc["moderate"] else "moderate incorrect streak"
+        cor_sig_count = max(cor["moderate"], cor["long"])
+        inc_sig_count = max(inc["moderate"], inc["long"])
 
-        is_sig_correct   = best_correct_p   and (best_correct_p.startswith('long')   or best_correct_p.startswith('moderate'))
-        is_sig_incorrect = best_incorrect_p and (best_incorrect_p.startswith('long') or best_incorrect_p.startswith('moderate'))
+        is_sig_correct   = cor_sig_n > cor["short"]
+        is_sig_incorrect = inc_sig_n > inc["short"]
 
         if is_sig_correct and not is_sig_incorrect:
-            selected_streak = best_correct_p
+            selected_streak = cor_sig_label
             streak_reason = (
-                f"correct streak is significant ('{best_correct_p}' at "
-                f"{_pct(correct_streaks[best_correct_p], n_students)} of students); "
-                f"most students have only short incorrect streaks "
-                f"('{best_incorrect_p}' at {_pct(incorrect_streaks.get(best_incorrect_p, 0), n_students)})"
+                f"correct streak is significant (moderate+long = {_pct(cor_sig_n, n_students)} "
+                f"beats short {_pct(cor['short'], n_students)}); "
+                f"incorrect streaks are mostly short ({_pct(inc['short'], n_students)} vs "
+                f"{_pct(inc_sig_n, n_students)} moderate+long)"
             )
         elif is_sig_incorrect and not is_sig_correct:
-            selected_streak = best_incorrect_p
+            selected_streak = inc_sig_label
             streak_reason = (
-                f"incorrect streak is significant ('{best_incorrect_p}' at "
-                f"{_pct(incorrect_streaks[best_incorrect_p], n_students)} of students); "
-                f"most students have only short correct streaks "
-                f"('{best_correct_p}' at {_pct(correct_streaks.get(best_correct_p, 0), n_students)})"
+                f"incorrect streak is significant (moderate+long = {_pct(inc_sig_n, n_students)} "
+                f"beats short {_pct(inc['short'], n_students)}); "
+                f"correct streaks are mostly short ({_pct(cor['short'], n_students)} vs "
+                f"{_pct(cor_sig_n, n_students)} moderate+long)"
             )
-        else:
-            # Both significant or both minor — pick whichever has the higher raw count
-            best_cor_n = correct_streaks.get(best_correct_p, 0) if best_correct_p else 0
-            best_inc_n = incorrect_streaks.get(best_incorrect_p, 0) if best_incorrect_p else 0
-            if best_cor_n >= best_inc_n:
-                selected_streak = best_correct_p
+        elif is_sig_correct and is_sig_incorrect:
+            if cor_sig_n >= inc_sig_n:
+                selected_streak = cor_sig_label
                 streak_reason = (
-                    f"both streaks significant — correct streak wins by count "
-                    f"('{best_correct_p}' {best_cor_n} vs '{best_incorrect_p}' {best_inc_n})"
+                    f"both streaks significant — correct wins by combined count "
+                    f"(correct moderate+long = {cor_sig_n} vs incorrect moderate+long = {inc_sig_n})"
                 )
             else:
-                selected_streak = best_incorrect_p
+                selected_streak = inc_sig_label
                 streak_reason = (
-                    f"both streaks significant — incorrect streak wins by count "
-                    f"('{best_incorrect_p}' {best_inc_n} vs '{best_correct_p}' {best_cor_n})"
+                    f"both streaks significant — incorrect wins by combined count "
+                    f"(incorrect moderate+long = {inc_sig_n} vs correct moderate+long = {cor_sig_n})"
                 )
+        else:
+            selected_streak = cor_sig_label if cor_sig_count >= inc_sig_count else inc_sig_label
+            streak_reason = (
+                f"neither streak family is significant (correct short={_pct(cor['short'], n_students)}, "
+                f"incorrect short={_pct(inc['short'], n_students)}); "
+                f"reporting larger non-short bucket for context"
+            )
 
-        cluster_report.append("  [Streak]")
-        for p, c in streak_counts.items():
-            cluster_report.append(f"    {p:40s}: {c:3d}  ({_pct(c, n_students)})")
-
-        if selected_streak:
-            clean_streak = selected_streak.replace("longest ", "")
-            cluster_parts.append(clean_streak)
-            cluster_report.append(f"  → SELECTED: '{clean_streak}'  [Reason: {streak_reason}]")
+        cluster_parts.append(selected_streak)
+        cluster_report.append(f"  → SELECTED: '{selected_streak}'  [Reason: {streak_reason}]")
 
         # ── Final keyword string ──────────────────────────────────────────────
         keywords_str = ", ".join(cluster_parts)
@@ -306,12 +356,10 @@ def save_cluster_keywords(df: pd.DataFrame, text_col: str, cluster_col: str, top
 
         report_lines.extend(cluster_report)
 
-    # Save CSV
     out_path = OUTPUT_DIR / make_versioned_filename("cluster_keywords_frequency_based.csv")
     pd.DataFrame(rows).to_csv(out_path, index=False)
     print(f"Saved cluster keywords to {out_path}")
 
-    # Save full report
     report_path = OUTPUT_DIR / make_versioned_filename("cluster_keywords_report.txt")
     report_path.write_text("\n".join(report_lines), encoding="utf-8")
     print(f"Saved keyword selection report to {report_path}")
@@ -338,8 +386,16 @@ def main() -> None:
     if base.empty:
         raise SystemExit("No overlapping students between numeric and narrative clustering.")
 
-    # Extract and save keywords for narrative clusters
-    save_cluster_keywords(base, "narrative_text", "narrative_best_label")
+    # Build template-agnostic categorical labels from the underlying numeric
+    # features so the keyword extractor works identically for Templates A, B
+    # and C (they describe the same 537 students in different words).
+    if DERIVED_FEATURES_PATH.exists():
+        derived = pd.read_csv(DERIVED_FEATURES_PATH)
+        cats = _build_categories(derived)
+        base_with_cats = base.merge(cats, on="IDCode", how="left")
+        save_cluster_keywords(base_with_cats, "narrative_best_label")
+    else:
+        print(f"[warn] Derived features not found at {DERIVED_FEATURES_PATH}; skipping keyword extraction.")
 
     # Overlap and ARI for BIC-based numeric GMM vs narrative GMM.
     overlap_bic = pd.crosstab(base["gmm_bic_best_label"], base["narrative_best_label"])

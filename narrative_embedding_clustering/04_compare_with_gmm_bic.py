@@ -189,42 +189,55 @@ def save_cluster_keywords(df: pd.DataFrame, text_col: str, cluster_col: str, top
         cluster_parts.append(clean_acc)
 
         # ── 2. Speed ─────────────────────────────────────────────────────────
-        _DOMINANCE = 0.60  # winner must represent at least 60% of students to be labelled clearly
+        # Mixed if the gap between the top two options is ≤15 percentage points
+        # (catches genuine 50/50 splits without penalising near-dominant 59/41 splits)
+        _GAP_THRESHOLD = 0.15
         speed_counts = {p: combined_text.count(p) for p in PHRASES['Speed']}
+        sorted_speed = sorted(speed_counts.values(), reverse=True)
+        speed_top_pct  = sorted_speed[0] / n_students
+        speed_sec_pct  = sorted_speed[1] / n_students if len(sorted_speed) > 1 else 0.0
         best_speed = max(speed_counts, key=speed_counts.get)
-        best_speed_pct = speed_counts[best_speed] / n_students
 
         cluster_report.append("  [Speed]")
         for p, c in speed_counts.items():
             cluster_report.append(f"    {p:30s}: {c:3d} students  ({_pct(c, n_students)})")
-        if best_speed_pct >= _DOMINANCE:
+        if (speed_top_pct - speed_sec_pct) >= _GAP_THRESHOLD:
             speed_label = best_speed
-            speed_reason = f"highest frequency ({_pct(speed_counts[best_speed], n_students)} of students, above 60% threshold)"
+            speed_reason = (
+                f"clear winner '{best_speed}' ({_pct(speed_counts[best_speed], n_students)}) "
+                f"leads 2nd place by {_pct(int((speed_top_pct - speed_sec_pct) * n_students), n_students)} pts"
+            )
         else:
             speed_label = "responses are mixed speed"
             speed_reason = (
-                f"no single speed dominates (best: '{best_speed}' at "
-                f"{_pct(speed_counts[best_speed], n_students)}, below 60% threshold)"
+                f"top two options within {_GAP_THRESHOLD*100:.0f}pp of each other "
+                f"('{best_speed}' at {_pct(speed_counts[best_speed], n_students)} vs 2nd at {_pct(int(speed_sec_pct * n_students), n_students)})"
             )
         cluster_report.append(f"  → SELECTED: '{speed_label}'  [Reason: {speed_reason}]")
         cluster_parts.append(speed_label)
 
         # ── 3. Timing variability ─────────────────────────────────────────────
+        # Same gap rule: mixed if top two timing options are within 15pp
         timing_counts = {p: combined_text.count(p) for p in PHRASES['Timing']}
+        sorted_timing = sorted(timing_counts.values(), reverse=True)
+        timing_top_pct = sorted_timing[0] / n_students
+        timing_sec_pct = sorted_timing[1] / n_students if len(sorted_timing) > 1 else 0.0
         best_timing = max(timing_counts, key=timing_counts.get)
-        best_timing_pct = timing_counts[best_timing] / n_students
 
         cluster_report.append("  [Timing Variability]")
         for p, c in timing_counts.items():
             cluster_report.append(f"    {p:35s}: {c:3d} students  ({_pct(c, n_students)})")
-        if best_timing_pct >= _DOMINANCE:
+        if (timing_top_pct - timing_sec_pct) >= _GAP_THRESHOLD:
             timing_label = best_timing
-            timing_reason = f"highest frequency ({_pct(timing_counts[best_timing], n_students)} of students, above 60% threshold)"
+            timing_reason = (
+                f"clear winner '{best_timing}' ({_pct(timing_counts[best_timing], n_students)}) "
+                f"leads 2nd place by {_pct(int((timing_top_pct - timing_sec_pct) * n_students), n_students)} pts"
+            )
         else:
             timing_label = "mixed timing variability"
             timing_reason = (
-                f"no single timing pattern dominates (best: '{best_timing}' at "
-                f"{_pct(timing_counts[best_timing], n_students)}, below 60% threshold)"
+                f"top two options within {_GAP_THRESHOLD*100:.0f}pp of each other "
+                f"('{best_timing}' at {_pct(timing_counts[best_timing], n_students)} vs 2nd at {_pct(int(timing_sec_pct * n_students), n_students)})"
             )
         cluster_report.append(f"  → SELECTED: '{timing_label}'  [Reason: {timing_reason}]")
         cluster_parts.append(timing_label)
@@ -257,11 +270,21 @@ def save_cluster_keywords(df: pd.DataFrame, text_col: str, cluster_col: str, top
                 f"{_pct(correct_streaks.get(best_correct_p, 0), n_students)})"
             )
         else:
-            selected_streak = best_correct_p if best_correct_p else best_incorrect_p
-            streak_reason = (
-                f"both streaks are significant or both minor — defaulting to correct streak "
-                f"('{selected_streak}', {_pct(streak_counts.get(selected_streak, 0), n_students)})"
-            )
+            # Both significant or both minor — pick whichever has the higher raw count
+            best_cor_n = correct_streaks.get(best_correct_p, 0) if best_correct_p else 0
+            best_inc_n = incorrect_streaks.get(best_incorrect_p, 0) if best_incorrect_p else 0
+            if best_cor_n >= best_inc_n:
+                selected_streak = best_correct_p
+                streak_reason = (
+                    f"both streaks significant — correct streak wins by count "
+                    f"('{best_correct_p}' {best_cor_n} vs '{best_incorrect_p}' {best_inc_n})"
+                )
+            else:
+                selected_streak = best_incorrect_p
+                streak_reason = (
+                    f"both streaks significant — incorrect streak wins by count "
+                    f"('{best_incorrect_p}' {best_inc_n} vs '{best_correct_p}' {best_cor_n})"
+                )
 
         cluster_report.append("  [Streak]")
         for p, c in streak_counts.items():

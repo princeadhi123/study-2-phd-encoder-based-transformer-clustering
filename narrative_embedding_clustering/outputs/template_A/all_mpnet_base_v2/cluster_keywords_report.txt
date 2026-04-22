@@ -75,7 +75,7 @@ CLUSTER 2  (n=89 students)
     stable in timing                   :   0 students  (0.0%)
     moderately variable in timing      :  59 students  (66.3%)
     highly variable in timing          :  30 students  (33.7%)
-  → SELECTED: 'moderately variable in timing'  [Reason: clear winner 'moderately variable in timing' (66.3%) leads 2nd place by 31.5% pts]
+  → SELECTED: 'moderately variable in timing'  [Reason: clear winner 'moderately variable in timing' (66.3%) leads 2nd place by 32.6% pts]
   [Streak]
     short longest correct streak            :  19  (21.3%)
     moderate longest correct streak         :  42  (47.2%)
@@ -103,7 +103,7 @@ CLUSTER 3  (n=129 students)
     stable in timing                   :   0 students  (0.0%)
     moderately variable in timing      :  36 students  (27.9%)
     highly variable in timing          :  93 students  (72.1%)
-  → SELECTED: 'highly variable in timing'  [Reason: clear winner 'highly variable in timing' (72.1%) leads 2nd place by 43.4% pts]
+  → SELECTED: 'highly variable in timing'  [Reason: clear winner 'highly variable in timing' (72.1%) leads 2nd place by 44.2% pts]
   [Streak]
     short longest correct streak            :  35  (27.1%)
     moderate longest correct streak         :  45  (34.9%)

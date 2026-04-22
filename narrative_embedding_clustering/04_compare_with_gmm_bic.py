@@ -203,9 +203,10 @@ def save_cluster_keywords(df: pd.DataFrame, text_col: str, cluster_col: str, top
             cluster_report.append(f"    {p:30s}: {c:3d} students  ({_pct(c, n_students)})")
         if (speed_top_pct - speed_sec_pct) >= _GAP_THRESHOLD:
             speed_label = best_speed
+            speed_diff_pts = round(speed_top_pct * 100, 1) - round(speed_sec_pct * 100, 1)
             speed_reason = (
                 f"clear winner '{best_speed}' ({_pct(speed_counts[best_speed], n_students)}) "
-                f"leads 2nd place by {(speed_top_pct - speed_sec_pct)*100:.1f}% pts"
+                f"leads 2nd place by {speed_diff_pts:.1f}% pts"
             )
         else:
             speed_label = "responses are mixed speed"
@@ -229,9 +230,10 @@ def save_cluster_keywords(df: pd.DataFrame, text_col: str, cluster_col: str, top
             cluster_report.append(f"    {p:35s}: {c:3d} students  ({_pct(c, n_students)})")
         if (timing_top_pct - timing_sec_pct) >= _GAP_THRESHOLD:
             timing_label = best_timing
+            timing_diff_pts = round(timing_top_pct * 100, 1) - round(timing_sec_pct * 100, 1)
             timing_reason = (
                 f"clear winner '{best_timing}' ({_pct(timing_counts[best_timing], n_students)}) "
-                f"leads 2nd place by {(timing_top_pct - timing_sec_pct)*100:.1f}% pts"
+                f"leads 2nd place by {timing_diff_pts:.1f}% pts"
             )
         else:
             timing_label = "mixed timing variability"

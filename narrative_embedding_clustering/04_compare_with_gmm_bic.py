@@ -107,131 +107,174 @@ def _save_zmean_heatmap(df: pd.DataFrame, cluster_col: str, value_cols: list, ou
     print(f"Saved plot to {out_path}")
 
 
+def _pct(count: int, total: int) -> str:
+    """Return a percentage string, e.g. '72.3%'."""
+    return f"{100 * count / total:.1f}%" if total > 0 else "0.0%"
+
+
 def save_cluster_keywords(df: pd.DataFrame, text_col: str, cluster_col: str, top_n: int = 3) -> None:
-    # Group text by cluster
     clusters = sorted(df[cluster_col].unique())
 
-    # Define the exact phrases we are looking for in the templates
-    # These map to the underlying logic of the narrative generation
     PHRASES = {
         'Accuracy': [
-            'high accuracy', 
-            'medium accuracy', 
-            'low accuracy'
+            'high accuracy',
+            'medium accuracy',
+            'low accuracy',
         ],
         'Speed': [
-            'responses are fast', 
-            'responses are moderate', 
-            'responses are slow'
+            'responses are fast',
+            'responses are moderate',
+            'responses are slow',
+        ],
+        'Timing': [
+            'stable in timing',
+            'moderately variable in timing',
+            'highly variable in timing',
         ],
         'Streak': [
-            'short longest correct streak', 
-            'moderate longest correct streak', 
+            'short longest correct streak',
+            'moderate longest correct streak',
             'long longest correct streak',
-            'short longest incorrect streak', 
-            'moderate longest incorrect streak', 
-            'long longest incorrect streak'
-        ]
+            'short longest incorrect streak',
+            'moderate longest incorrect streak',
+            'long longest incorrect streak',
+        ],
     }
 
     rows = []
-    
+    report_lines = [
+        "=" * 72,
+        "CLUSTER KEYWORD SELECTION REPORT",
+        f"Generated from column '{cluster_col}' | {len(df)} students total",
+        "=" * 72,
+        "",
+    ]
+
     for cluster_label in clusters:
-        # Get texts for this cluster
         sub_df = df[df[cluster_col] == cluster_label]
         combined_text = " ".join(sub_df[text_col].astype(str).tolist())
         n_students = len(sub_df)
-        
+
         cluster_parts = []
-        
-        # 1. Determine Accuracy
-        best_acc = None
-        max_acc_count = -1
-        for p in PHRASES['Accuracy']:
-            count = combined_text.count(p)
-            if count > max_acc_count:
-                max_acc_count = count
-                best_acc = p
-        
-        if best_acc:
-            # Format: "With medium accuracy"
-            # Ensure it starts with "With "
-            clean_acc = best_acc
-            if not clean_acc.lower().startswith("with"):
-                clean_acc = "With " + clean_acc
-            cluster_parts.append(clean_acc)
+        cluster_report = [
+            f"CLUSTER {int(cluster_label)}  (n={n_students} students)",
+            "-" * 50,
+        ]
 
-        # 2. Determine Speed
-        best_speed = None
-        max_speed_count = -1
-        for p in PHRASES['Speed']:
-            count = combined_text.count(p)
-            if count > max_speed_count:
-                max_speed_count = count
-                best_speed = p
-        
-        if best_speed:
-            cluster_parts.append(best_speed)
+        # ── 1. Accuracy ──────────────────────────────────────────────────────
+        acc_counts = {p: combined_text.count(p) for p in PHRASES['Accuracy']}
+        total_acc = sum(acc_counts.values()) or 1
+        high_n = acc_counts['high accuracy']
+        med_n  = acc_counts['medium accuracy']
+        low_n  = acc_counts['low accuracy']
+        best_acc = max(acc_counts, key=acc_counts.get)
 
-        # 3. Determine Streak
-        # We need to be careful here. We count all 6 types.
-        streak_counts = {}
-        for p in PHRASES['Streak']:
-            streak_counts[p] = combined_text.count(p)
-            
-        # Separate into Correct and Incorrect
-        correct_streaks = {k: v for k, v in streak_counts.items() if 'correct streak' in k and 'incorrect' not in k}
-        incorrect_streaks = {k: v for k, v in streak_counts.items() if 'incorrect streak' in k}
-        
-        # Find best of each
-        best_correct_p = max(correct_streaks, key=correct_streaks.get) if correct_streaks else None
-        best_correct_n = correct_streaks[best_correct_p] if best_correct_p else 0
-        
-        best_incorrect_p = max(incorrect_streaks, key=incorrect_streaks.get) if incorrect_streaks else None
-        best_incorrect_n = incorrect_streaks[best_incorrect_p] if best_incorrect_p else 0
-        
-        selected_streak = None
-        
-        # Selection Logic Refined for "Meaningfulness":
-        # 1. We define "Significant" as 'long' or 'moderate'. "Generic" as 'short'.
-        # 2. If one is Significant and the other is Generic, pick the Significant one.
-        # 3. If both are Significant or both are Generic, pick Correct (User preference for positivity/correctness).
-        # 4. Tie-breaking or close calls should respect the above.
+        cluster_report.append("  [Accuracy]")
+        for p, c in acc_counts.items():
+            cluster_report.append(f"    {p:30s}: {c:3d} students  ({_pct(c, n_students)})")
 
-        # Fix: Ensure we don't match "longest" when looking for "long"
-        is_significant_correct = best_correct_p and (best_correct_p.startswith('long') or best_correct_p.startswith('moderate'))
-        is_significant_incorrect = best_incorrect_p and (best_incorrect_p.startswith('long') or best_incorrect_p.startswith('moderate'))
-        
-        if is_significant_correct and not is_significant_incorrect:
-            # Case: Moderate Correct vs Short Incorrect -> Pick Correct
-            selected_streak = best_correct_p
-        elif is_significant_incorrect and not is_significant_correct:
-            # Case: Short Correct vs Long Incorrect -> Pick Incorrect (More descriptive of the struggle)
-            selected_streak = best_incorrect_p
+        if high_n > 0 and med_n > 0 and min(high_n, med_n) / max(high_n, med_n) >= 0.50:
+            clean_acc = "With medium-to-high accuracy"
+            cluster_report.append(
+                f"  → SELECTED: '{clean_acc}'  "
+                f"[Reason: high ({_pct(high_n, n_students)}) and medium ({_pct(med_n, n_students)}) "
+                f"are within 50% of each other — mixed accuracy cluster]"
+            )
         else:
-            # Both Significant (e.g. Moderate Correct vs Long Incorrect)
-            # OR Both Generic (Short Correct vs Short Incorrect)
-            # Default to Correct as per user preference for positive framing if available
-            # But only if it exists
-            if best_correct_p:
-                selected_streak = best_correct_p
-            else:
-                selected_streak = best_incorrect_p
-            
+            clean_acc = "With " + best_acc
+            cluster_report.append(
+                f"  → SELECTED: '{clean_acc}'  "
+                f"[Reason: dominant label ({_pct(acc_counts[best_acc], n_students)} of students)]"
+            )
+        cluster_parts.append(clean_acc)
+
+        # ── 2. Speed ─────────────────────────────────────────────────────────
+        speed_counts = {p: combined_text.count(p) for p in PHRASES['Speed']}
+        best_speed = max(speed_counts, key=speed_counts.get)
+
+        cluster_report.append("  [Speed]")
+        for p, c in speed_counts.items():
+            cluster_report.append(f"    {p:30s}: {c:3d} students  ({_pct(c, n_students)})")
+        cluster_report.append(
+            f"  → SELECTED: '{best_speed}'  "
+            f"[Reason: highest frequency ({_pct(speed_counts[best_speed], n_students)} of students)]"
+        )
+        cluster_parts.append(best_speed)
+
+        # ── 3. Timing variability ─────────────────────────────────────────────
+        timing_counts = {p: combined_text.count(p) for p in PHRASES['Timing']}
+        best_timing = max(timing_counts, key=timing_counts.get)
+
+        cluster_report.append("  [Timing Variability]")
+        for p, c in timing_counts.items():
+            cluster_report.append(f"    {p:35s}: {c:3d} students  ({_pct(c, n_students)})")
+        cluster_report.append(
+            f"  → SELECTED: '{best_timing}'  "
+            f"[Reason: highest frequency ({_pct(timing_counts[best_timing], n_students)} of students)]"
+        )
+        cluster_parts.append(best_timing)
+
+        # ── 4. Streak ─────────────────────────────────────────────────────────
+        streak_counts = {p: combined_text.count(p) for p in PHRASES['Streak']}
+        correct_streaks  = {k: v for k, v in streak_counts.items() if 'correct streak'  in k and 'incorrect' not in k}
+        incorrect_streaks = {k: v for k, v in streak_counts.items() if 'incorrect streak' in k}
+
+        best_correct_p   = max(correct_streaks,   key=correct_streaks.get)   if correct_streaks   else None
+        best_incorrect_p = max(incorrect_streaks, key=incorrect_streaks.get) if incorrect_streaks else None
+
+        is_sig_correct   = best_correct_p   and (best_correct_p.startswith('long')   or best_correct_p.startswith('moderate'))
+        is_sig_incorrect = best_incorrect_p and (best_incorrect_p.startswith('long') or best_incorrect_p.startswith('moderate'))
+
+        if is_sig_correct and not is_sig_incorrect:
+            selected_streak = best_correct_p
+            streak_reason = (
+                f"correct streak is significant ('{best_correct_p}', "
+                f"{_pct(correct_streaks[best_correct_p], n_students)}) while incorrect streak "
+                f"is short/minor ('{best_incorrect_p}', "
+                f"{_pct(incorrect_streaks.get(best_incorrect_p, 0), n_students)})"
+            )
+        elif is_sig_incorrect and not is_sig_correct:
+            selected_streak = best_incorrect_p
+            streak_reason = (
+                f"incorrect streak is significant ('{best_incorrect_p}', "
+                f"{_pct(incorrect_streaks[best_incorrect_p], n_students)}) while correct streak "
+                f"is short/minor ('{best_correct_p}', "
+                f"{_pct(correct_streaks.get(best_correct_p, 0), n_students)})"
+            )
+        else:
+            selected_streak = best_correct_p if best_correct_p else best_incorrect_p
+            streak_reason = (
+                f"both streaks are significant or both minor — defaulting to correct streak "
+                f"('{selected_streak}', {_pct(streak_counts.get(selected_streak, 0), n_students)})"
+            )
+
+        cluster_report.append("  [Streak]")
+        for p, c in streak_counts.items():
+            cluster_report.append(f"    {p:40s}: {c:3d}  ({_pct(c, n_students)})")
+
         if selected_streak:
-            # Cleanup: remove "longest" to match user request "moderate correct streak"
-            # Phrase is like "moderate longest correct streak" -> "moderate correct streak"
             clean_streak = selected_streak.replace("longest ", "")
             cluster_parts.append(clean_streak)
+            cluster_report.append(f"  → SELECTED: '{clean_streak}'  [Reason: {streak_reason}]")
 
-        # Join parts
+        # ── Final keyword string ──────────────────────────────────────────────
         keywords_str = ", ".join(cluster_parts)
         rows.append({"Cluster": cluster_label, "Keywords": keywords_str})
+        cluster_report.append("")
+        cluster_report.append(f"  ★ FINAL KEYWORD: \"{keywords_str}\"")
+        cluster_report.append("")
 
-    # Save
+        report_lines.extend(cluster_report)
+
+    # Save CSV
     out_path = OUTPUT_DIR / make_versioned_filename("cluster_keywords_frequency_based.csv")
     pd.DataFrame(rows).to_csv(out_path, index=False)
     print(f"Saved cluster keywords to {out_path}")
+
+    # Save full report
+    report_path = OUTPUT_DIR / make_versioned_filename("cluster_keywords_report.txt")
+    report_path.write_text("\n".join(report_lines), encoding="utf-8")
+    print(f"Saved keyword selection report to {report_path}")
 
 
 def main() -> None:

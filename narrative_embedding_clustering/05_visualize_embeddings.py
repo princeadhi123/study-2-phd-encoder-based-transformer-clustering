@@ -479,7 +479,9 @@ def main() -> None:
         )
 
     # --- t-SNE projection (narrative clusters only) ---
-    tsne = TSNE(n_components=2, random_state=42, init="pca", learning_rate="auto", perplexity=30)
+    n_samples = X.shape[0]
+    tsne_perplexity = min(30, max(5, n_samples // 10))
+    tsne = TSNE(n_components=2, random_state=42, init="pca", learning_rate="auto", perplexity=tsne_perplexity)
     X_tsne = tsne.fit_transform(X)
     coords_tsne = coords.copy()
     coords_tsne["dim1"] = X_tsne[:, 0]
@@ -488,7 +490,7 @@ def main() -> None:
     tsne_labels = coords_tsne["narrative_best_label"].dropna()
     tsne_sil = silhouette_score(X_tsne, tsne_labels)
     kl_div = tsne.kl_divergence_
-    print(f"t-SNE Silhouette={tsne_sil:.3f}, KL Divergence={kl_div:.4f}")
+    print(f"t-SNE perplexity={tsne_perplexity}, Silhouette={tsne_sil:.3f}, KL Divergence={kl_div:.4f}")
 
     _plot_scatter(
         coords_tsne,
@@ -497,8 +499,8 @@ def main() -> None:
         filename=make_versioned_filename("embeddings_tsne_narrative_clusters.png"),
         x_col="dim1",
         y_col="dim2",
-        x_label=f"t-SNE1  (perplexity=30, KL={kl_div:.2f})",
-        y_label=f"t-SNE2  (silhouette={tsne_sil:.2f})",
+        x_label=f"t-SNE1  (perplexity={tsne_perplexity})",
+        y_label=f"t-SNE2  (perplexity={tsne_perplexity})",
     )
 
     # --- LDA projection (supervised by narrative clusters) ---

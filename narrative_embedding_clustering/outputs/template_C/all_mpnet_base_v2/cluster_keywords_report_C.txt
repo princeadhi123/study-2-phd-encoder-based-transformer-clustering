@@ -1,0 +1,256 @@
+========================================================================
+CLUSTER KEYWORD SELECTION REPORT
+Generated from column 'narrative_best_label' | 537 students total
+========================================================================
+
+CLUSTER 0  (n=2 students)
+--------------------------------------------------
+  [Accuracy]
+    high accuracy                 :   0 students  (0.0%)
+    medium accuracy               :   0 students  (0.0%)
+    low accuracy                  :   0 students  (0.0%)
+  → SELECTED: 'With high accuracy'  [Reason: dominant label (0.0% of students)]
+  [Speed]
+    responses are fast            :   0 students  (0.0%)
+    responses are moderate        :   0 students  (0.0%)
+    responses are slow            :   0 students  (0.0%)
+  → SELECTED: 'responses are fast'  [Reason: highest frequency (0.0% of students)]
+  [Timing Variability]
+    stable in timing                   :   0 students  (0.0%)
+    moderately variable in timing      :   0 students  (0.0%)
+    highly variable in timing          :   0 students  (0.0%)
+  → SELECTED: 'stable in timing'  [Reason: highest frequency (0.0% of students)]
+  [Streak]
+    short longest correct streak            :   0  (0.0%)
+    moderate longest correct streak         :   0  (0.0%)
+    long longest correct streak             :   0  (0.0%)
+    short longest incorrect streak          :   0  (0.0%)
+    moderate longest incorrect streak       :   0  (0.0%)
+    long longest incorrect streak           :   0  (0.0%)
+  → SELECTED: 'short correct streak'  [Reason: both streaks are significant or both minor — defaulting to correct streak ('short longest correct streak', 0.0%)]
+
+  ★ FINAL KEYWORD: "With high accuracy, responses are fast, stable in timing, short correct streak"
+
+CLUSTER 1  (n=14 students)
+--------------------------------------------------
+  [Accuracy]
+    high accuracy                 :   0 students  (0.0%)
+    medium accuracy               :   0 students  (0.0%)
+    low accuracy                  :   0 students  (0.0%)
+  → SELECTED: 'With high accuracy'  [Reason: dominant label (0.0% of students)]
+  [Speed]
+    responses are fast            :   0 students  (0.0%)
+    responses are moderate        :   0 students  (0.0%)
+    responses are slow            :   0 students  (0.0%)
+  → SELECTED: 'responses are fast'  [Reason: highest frequency (0.0% of students)]
+  [Timing Variability]
+    stable in timing                   :   0 students  (0.0%)
+    moderately variable in timing      :   0 students  (0.0%)
+    highly variable in timing          :   0 students  (0.0%)
+  → SELECTED: 'stable in timing'  [Reason: highest frequency (0.0% of students)]
+  [Streak]
+    short longest correct streak            :   0  (0.0%)
+    moderate longest correct streak         :   0  (0.0%)
+    long longest correct streak             :   0  (0.0%)
+    short longest incorrect streak          :   0  (0.0%)
+    moderate longest incorrect streak       :   0  (0.0%)
+    long longest incorrect streak           :   0  (0.0%)
+  → SELECTED: 'short correct streak'  [Reason: both streaks are significant or both minor — defaulting to correct streak ('short longest correct streak', 0.0%)]
+
+  ★ FINAL KEYWORD: "With high accuracy, responses are fast, stable in timing, short correct streak"
+
+CLUSTER 2  (n=130 students)
+--------------------------------------------------
+  [Accuracy]
+    high accuracy                 :   0 students  (0.0%)
+    medium accuracy               :   0 students  (0.0%)
+    low accuracy                  :   0 students  (0.0%)
+  → SELECTED: 'With high accuracy'  [Reason: dominant label (0.0% of students)]
+  [Speed]
+    responses are fast            :   0 students  (0.0%)
+    responses are moderate        :   0 students  (0.0%)
+    responses are slow            :   0 students  (0.0%)
+  → SELECTED: 'responses are fast'  [Reason: highest frequency (0.0% of students)]
+  [Timing Variability]
+    stable in timing                   :   0 students  (0.0%)
+    moderately variable in timing      :   0 students  (0.0%)
+    highly variable in timing          :   0 students  (0.0%)
+  → SELECTED: 'stable in timing'  [Reason: highest frequency (0.0% of students)]
+  [Streak]
+    short longest correct streak            :   0  (0.0%)
+    moderate longest correct streak         :   0  (0.0%)
+    long longest correct streak             :   0  (0.0%)
+    short longest incorrect streak          :   0  (0.0%)
+    moderate longest incorrect streak       :   0  (0.0%)
+    long longest incorrect streak           :   0  (0.0%)
+  → SELECTED: 'short correct streak'  [Reason: both streaks are significant or both minor — defaulting to correct streak ('short longest correct streak', 0.0%)]
+
+  ★ FINAL KEYWORD: "With high accuracy, responses are fast, stable in timing, short correct streak"
+
+CLUSTER 3  (n=164 students)
+--------------------------------------------------
+  [Accuracy]
+    high accuracy                 :   0 students  (0.0%)
+    medium accuracy               :   0 students  (0.0%)
+    low accuracy                  :   0 students  (0.0%)
+  → SELECTED: 'With high accuracy'  [Reason: dominant label (0.0% of students)]
+  [Speed]
+    responses are fast            :   0 students  (0.0%)
+    responses are moderate        :   0 students  (0.0%)
+    responses are slow            :   0 students  (0.0%)
+  → SELECTED: 'responses are fast'  [Reason: highest frequency (0.0% of students)]
+  [Timing Variability]
+    stable in timing                   :   0 students  (0.0%)
+    moderately variable in timing      :   0 students  (0.0%)
+    highly variable in timing          :   0 students  (0.0%)
+  → SELECTED: 'stable in timing'  [Reason: highest frequency (0.0% of students)]
+  [Streak]
+    short longest correct streak            :   0  (0.0%)
+    moderate longest correct streak         :   0  (0.0%)
+    long longest correct streak             :   0  (0.0%)
+    short longest incorrect streak          :   0  (0.0%)
+    moderate longest incorrect streak       :   0  (0.0%)
+    long longest incorrect streak           :   0  (0.0%)
+  → SELECTED: 'short correct streak'  [Reason: both streaks are significant or both minor — defaulting to correct streak ('short longest correct streak', 0.0%)]
+
+  ★ FINAL KEYWORD: "With high accuracy, responses are fast, stable in timing, short correct streak"
+
+CLUSTER 4  (n=6 students)
+--------------------------------------------------
+  [Accuracy]
+    high accuracy                 :   0 students  (0.0%)
+    medium accuracy               :   0 students  (0.0%)
+    low accuracy                  :   0 students  (0.0%)
+  → SELECTED: 'With high accuracy'  [Reason: dominant label (0.0% of students)]
+  [Speed]
+    responses are fast            :   0 students  (0.0%)
+    responses are moderate        :   0 students  (0.0%)
+    responses are slow            :   0 students  (0.0%)
+  → SELECTED: 'responses are fast'  [Reason: highest frequency (0.0% of students)]
+  [Timing Variability]
+    stable in timing                   :   0 students  (0.0%)
+    moderately variable in timing      :   0 students  (0.0%)
+    highly variable in timing          :   0 students  (0.0%)
+  → SELECTED: 'stable in timing'  [Reason: highest frequency (0.0% of students)]
+  [Streak]
+    short longest correct streak            :   0  (0.0%)
+    moderate longest correct streak         :   0  (0.0%)
+    long longest correct streak             :   0  (0.0%)
+    short longest incorrect streak          :   0  (0.0%)
+    moderate longest incorrect streak       :   0  (0.0%)
+    long longest incorrect streak           :   0  (0.0%)
+  → SELECTED: 'short correct streak'  [Reason: both streaks are significant or both minor — defaulting to correct streak ('short longest correct streak', 0.0%)]
+
+  ★ FINAL KEYWORD: "With high accuracy, responses are fast, stable in timing, short correct streak"
+
+CLUSTER 5  (n=93 students)
+--------------------------------------------------
+  [Accuracy]
+    high accuracy                 :   0 students  (0.0%)
+    medium accuracy               :   0 students  (0.0%)
+    low accuracy                  :   0 students  (0.0%)
+  → SELECTED: 'With high accuracy'  [Reason: dominant label (0.0% of students)]
+  [Speed]
+    responses are fast            :   0 students  (0.0%)
+    responses are moderate        :   0 students  (0.0%)
+    responses are slow            :   0 students  (0.0%)
+  → SELECTED: 'responses are fast'  [Reason: highest frequency (0.0% of students)]
+  [Timing Variability]
+    stable in timing                   :   0 students  (0.0%)
+    moderately variable in timing      :   0 students  (0.0%)
+    highly variable in timing          :   0 students  (0.0%)
+  → SELECTED: 'stable in timing'  [Reason: highest frequency (0.0% of students)]
+  [Streak]
+    short longest correct streak            :   0  (0.0%)
+    moderate longest correct streak         :   0  (0.0%)
+    long longest correct streak             :   0  (0.0%)
+    short longest incorrect streak          :   0  (0.0%)
+    moderate longest incorrect streak       :   0  (0.0%)
+    long longest incorrect streak           :   0  (0.0%)
+  → SELECTED: 'short correct streak'  [Reason: both streaks are significant or both minor — defaulting to correct streak ('short longest correct streak', 0.0%)]
+
+  ★ FINAL KEYWORD: "With high accuracy, responses are fast, stable in timing, short correct streak"
+
+CLUSTER 6  (n=13 students)
+--------------------------------------------------
+  [Accuracy]
+    high accuracy                 :   0 students  (0.0%)
+    medium accuracy               :   0 students  (0.0%)
+    low accuracy                  :   0 students  (0.0%)
+  → SELECTED: 'With high accuracy'  [Reason: dominant label (0.0% of students)]
+  [Speed]
+    responses are fast            :   0 students  (0.0%)
+    responses are moderate        :   0 students  (0.0%)
+    responses are slow            :   0 students  (0.0%)
+  → SELECTED: 'responses are fast'  [Reason: highest frequency (0.0% of students)]
+  [Timing Variability]
+    stable in timing                   :   0 students  (0.0%)
+    moderately variable in timing      :   0 students  (0.0%)
+    highly variable in timing          :   0 students  (0.0%)
+  → SELECTED: 'stable in timing'  [Reason: highest frequency (0.0% of students)]
+  [Streak]
+    short longest correct streak            :   0  (0.0%)
+    moderate longest correct streak         :   0  (0.0%)
+    long longest correct streak             :   0  (0.0%)
+    short longest incorrect streak          :   0  (0.0%)
+    moderate longest incorrect streak       :   0  (0.0%)
+    long longest incorrect streak           :   0  (0.0%)
+  → SELECTED: 'short correct streak'  [Reason: both streaks are significant or both minor — defaulting to correct streak ('short longest correct streak', 0.0%)]
+
+  ★ FINAL KEYWORD: "With high accuracy, responses are fast, stable in timing, short correct streak"
+
+CLUSTER 7  (n=99 students)
+--------------------------------------------------
+  [Accuracy]
+    high accuracy                 :   0 students  (0.0%)
+    medium accuracy               :   0 students  (0.0%)
+    low accuracy                  :   0 students  (0.0%)
+  → SELECTED: 'With high accuracy'  [Reason: dominant label (0.0% of students)]
+  [Speed]
+    responses are fast            :   0 students  (0.0%)
+    responses are moderate        :   0 students  (0.0%)
+    responses are slow            :   0 students  (0.0%)
+  → SELECTED: 'responses are fast'  [Reason: highest frequency (0.0% of students)]
+  [Timing Variability]
+    stable in timing                   :   0 students  (0.0%)
+    moderately variable in timing      :   0 students  (0.0%)
+    highly variable in timing          :   0 students  (0.0%)
+  → SELECTED: 'stable in timing'  [Reason: highest frequency (0.0% of students)]
+  [Streak]
+    short longest correct streak            :   0  (0.0%)
+    moderate longest correct streak         :   0  (0.0%)
+    long longest correct streak             :   0  (0.0%)
+    short longest incorrect streak          :   0  (0.0%)
+    moderate longest incorrect streak       :   0  (0.0%)
+    long longest incorrect streak           :   0  (0.0%)
+  → SELECTED: 'short correct streak'  [Reason: both streaks are significant or both minor — defaulting to correct streak ('short longest correct streak', 0.0%)]
+
+  ★ FINAL KEYWORD: "With high accuracy, responses are fast, stable in timing, short correct streak"
+
+CLUSTER 8  (n=16 students)
+--------------------------------------------------
+  [Accuracy]
+    high accuracy                 :   0 students  (0.0%)
+    medium accuracy               :   0 students  (0.0%)
+    low accuracy                  :   0 students  (0.0%)
+  → SELECTED: 'With high accuracy'  [Reason: dominant label (0.0% of students)]
+  [Speed]
+    responses are fast            :   0 students  (0.0%)
+    responses are moderate        :   0 students  (0.0%)
+    responses are slow            :   0 students  (0.0%)
+  → SELECTED: 'responses are fast'  [Reason: highest frequency (0.0% of students)]
+  [Timing Variability]
+    stable in timing                   :   0 students  (0.0%)
+    moderately variable in timing      :   0 students  (0.0%)
+    highly variable in timing          :   0 students  (0.0%)
+  → SELECTED: 'stable in timing'  [Reason: highest frequency (0.0% of students)]
+  [Streak]
+    short longest correct streak            :   0  (0.0%)
+    moderate longest correct streak         :   0  (0.0%)
+    long longest correct streak             :   0  (0.0%)
+    short longest incorrect streak          :   0  (0.0%)
+    moderate longest incorrect streak       :   0  (0.0%)
+    long longest incorrect streak           :   0  (0.0%)
+  → SELECTED: 'short correct streak'  [Reason: both streaks are significant or both minor — defaulting to correct streak ('short longest correct streak', 0.0%)]
+
+  ★ FINAL KEYWORD: "With high accuracy, responses are fast, stable in timing, short correct streak"

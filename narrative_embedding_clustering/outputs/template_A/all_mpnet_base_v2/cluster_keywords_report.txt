@@ -14,12 +14,12 @@ CLUSTER 0  (n=62 students)
     responses are fast            :  61 students  (98.4%)
     responses are moderate        :   0 students  (0.0%)
     responses are slow            :   1 students  (1.6%)
-  → SELECTED: 'responses are fast'  [Reason: highest frequency (98.4% of students)]
+  → SELECTED: 'responses are fast'  [Reason: highest frequency (98.4% of students, above 60% threshold)]
   [Timing Variability]
     stable in timing                   :  44 students  (71.0%)
     moderately variable in timing      :  17 students  (27.4%)
     highly variable in timing          :   1 students  (1.6%)
-  → SELECTED: 'stable in timing'  [Reason: highest frequency (71.0% of students)]
+  → SELECTED: 'stable in timing'  [Reason: highest frequency (71.0% of students, above 60% threshold)]
   [Streak]
     short longest correct streak            :  14  (22.6%)
     moderate longest correct streak         :  33  (53.2%)
@@ -42,12 +42,12 @@ CLUSTER 1  (n=90 students)
     responses are fast            :  43 students  (47.8%)
     responses are moderate        :   0 students  (0.0%)
     responses are slow            :  47 students  (52.2%)
-  → SELECTED: 'responses are slow'  [Reason: highest frequency (52.2% of students)]
+  → SELECTED: 'responses are mixed speed'  [Reason: no single speed dominates (best: 'responses are slow' at 52.2%, below 60% threshold)]
   [Timing Variability]
     stable in timing                   :  33 students  (36.7%)
     moderately variable in timing      :  22 students  (24.4%)
     highly variable in timing          :  35 students  (38.9%)
-  → SELECTED: 'highly variable in timing'  [Reason: highest frequency (38.9% of students)]
+  → SELECTED: 'mixed timing variability'  [Reason: no single timing pattern dominates (best: 'highly variable in timing' at 38.9%, below 60% threshold)]
   [Streak]
     short longest correct streak            :  81  (90.0%)
     moderate longest correct streak         :   9  (10.0%)
@@ -57,7 +57,7 @@ CLUSTER 1  (n=90 students)
     long longest incorrect streak           :  89  (98.9%)
   → SELECTED: 'long incorrect streak'  [Reason: incorrect streak is significant ('long longest incorrect streak', 98.9%) while correct streak is short/minor ('short longest correct streak', 90.0%)]
 
-  ★ FINAL KEYWORD: "With low accuracy, responses are slow, highly variable in timing, long incorrect streak"
+  ★ FINAL KEYWORD: "With low accuracy, responses are mixed speed, mixed timing variability, long incorrect streak"
 
 CLUSTER 2  (n=89 students)
 --------------------------------------------------
@@ -70,12 +70,12 @@ CLUSTER 2  (n=89 students)
     responses are fast            :   0 students  (0.0%)
     responses are moderate        :  89 students  (100.0%)
     responses are slow            :   0 students  (0.0%)
-  → SELECTED: 'responses are moderate'  [Reason: highest frequency (100.0% of students)]
+  → SELECTED: 'responses are moderate'  [Reason: highest frequency (100.0% of students, above 60% threshold)]
   [Timing Variability]
     stable in timing                   :   0 students  (0.0%)
     moderately variable in timing      :  59 students  (66.3%)
     highly variable in timing          :  30 students  (33.7%)
-  → SELECTED: 'moderately variable in timing'  [Reason: highest frequency (66.3% of students)]
+  → SELECTED: 'moderately variable in timing'  [Reason: highest frequency (66.3% of students, above 60% threshold)]
   [Streak]
     short longest correct streak            :  19  (21.3%)
     moderate longest correct streak         :  42  (47.2%)
@@ -98,12 +98,12 @@ CLUSTER 3  (n=129 students)
     responses are fast            :   0 students  (0.0%)
     responses are moderate        :   0 students  (0.0%)
     responses are slow            : 129 students  (100.0%)
-  → SELECTED: 'responses are slow'  [Reason: highest frequency (100.0% of students)]
+  → SELECTED: 'responses are slow'  [Reason: highest frequency (100.0% of students, above 60% threshold)]
   [Timing Variability]
     stable in timing                   :   0 students  (0.0%)
     moderately variable in timing      :  36 students  (27.9%)
     highly variable in timing          :  93 students  (72.1%)
-  → SELECTED: 'highly variable in timing'  [Reason: highest frequency (72.1% of students)]
+  → SELECTED: 'highly variable in timing'  [Reason: highest frequency (72.1% of students, above 60% threshold)]
   [Streak]
     short longest correct streak            :  35  (27.1%)
     moderate longest correct streak         :  45  (34.9%)
@@ -126,12 +126,12 @@ CLUSTER 4  (n=39 students)
     responses are fast            :   0 students  (0.0%)
     responses are moderate        :  39 students  (100.0%)
     responses are slow            :   0 students  (0.0%)
-  → SELECTED: 'responses are moderate'  [Reason: highest frequency (100.0% of students)]
+  → SELECTED: 'responses are moderate'  [Reason: highest frequency (100.0% of students, above 60% threshold)]
   [Timing Variability]
     stable in timing                   :  18 students  (46.2%)
     moderately variable in timing      :  14 students  (35.9%)
     highly variable in timing          :   7 students  (17.9%)
-  → SELECTED: 'stable in timing'  [Reason: highest frequency (46.2% of students)]
+  → SELECTED: 'mixed timing variability'  [Reason: no single timing pattern dominates (best: 'stable in timing' at 46.2%, below 60% threshold)]
   [Streak]
     short longest correct streak            :  27  (69.2%)
     moderate longest correct streak         :  12  (30.8%)
@@ -141,7 +141,7 @@ CLUSTER 4  (n=39 students)
     long longest incorrect streak           :  38  (97.4%)
   → SELECTED: 'long incorrect streak'  [Reason: incorrect streak is significant ('long longest incorrect streak', 97.4%) while correct streak is short/minor ('short longest correct streak', 69.2%)]
 
-  ★ FINAL KEYWORD: "With low accuracy, responses are moderate, stable in timing, long incorrect streak"
+  ★ FINAL KEYWORD: "With low accuracy, responses are moderate, mixed timing variability, long incorrect streak"
 
 CLUSTER 5  (n=55 students)
 --------------------------------------------------
@@ -154,12 +154,12 @@ CLUSTER 5  (n=55 students)
     responses are fast            :   0 students  (0.0%)
     responses are moderate        :  55 students  (100.0%)
     responses are slow            :   0 students  (0.0%)
-  → SELECTED: 'responses are moderate'  [Reason: highest frequency (100.0% of students)]
+  → SELECTED: 'responses are moderate'  [Reason: highest frequency (100.0% of students, above 60% threshold)]
   [Timing Variability]
     stable in timing                   :  35 students  (63.6%)
     moderately variable in timing      :  12 students  (21.8%)
     highly variable in timing          :   8 students  (14.5%)
-  → SELECTED: 'stable in timing'  [Reason: highest frequency (63.6% of students)]
+  → SELECTED: 'stable in timing'  [Reason: highest frequency (63.6% of students, above 60% threshold)]
   [Streak]
     short longest correct streak            :   5  (9.1%)
     moderate longest correct streak         :  15  (27.3%)
@@ -182,12 +182,12 @@ CLUSTER 6  (n=73 students)
     responses are fast            :  73 students  (100.0%)
     responses are moderate        :   0 students  (0.0%)
     responses are slow            :   0 students  (0.0%)
-  → SELECTED: 'responses are fast'  [Reason: highest frequency (100.0% of students)]
+  → SELECTED: 'responses are fast'  [Reason: highest frequency (100.0% of students, above 60% threshold)]
   [Timing Variability]
     stable in timing                   :  47 students  (64.4%)
     moderately variable in timing      :  23 students  (31.5%)
     highly variable in timing          :   3 students  (4.1%)
-  → SELECTED: 'stable in timing'  [Reason: highest frequency (64.4% of students)]
+  → SELECTED: 'stable in timing'  [Reason: highest frequency (64.4% of students, above 60% threshold)]
   [Streak]
     short longest correct streak            :   0  (0.0%)
     moderate longest correct streak         :  19  (26.0%)

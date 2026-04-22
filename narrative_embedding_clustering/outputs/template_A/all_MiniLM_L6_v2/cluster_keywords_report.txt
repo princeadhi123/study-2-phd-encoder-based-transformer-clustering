@@ -98,7 +98,7 @@ CLUSTER 3  (n=57 students)
     responses are fast            :  34 students  (59.6%)
     responses are moderate        :  23 students  (40.4%)
     responses are slow            :   0 students  (0.0%)
-  → SELECTED: 'responses are fast'  [Reason: clear winner 'responses are fast' (59.6%) leads 2nd place by 19.3% pts]
+  → SELECTED: 'responses are fast'  [Reason: clear winner 'responses are fast' (59.6%) leads 2nd place by 19.2% pts]
   [Timing Variability]
     stable in timing                   :  25 students  (43.9%)
     moderately variable in timing      :  23 students  (40.4%)

@@ -19,7 +19,7 @@ CLUSTER 0  (n=62 students)
     stable in timing                   :  44 students  (71.0%)
     moderately variable in timing      :  17 students  (27.4%)
     highly variable in timing          :   1 students  (1.6%)
-  → SELECTED: 'stable in timing'  [Reason: clear winner 'stable in timing' (71.0%) leads 2nd place by 43.5% pts]
+  → SELECTED: 'stable in timing'  [Reason: clear winner 'stable in timing' (71.0%) leads 2nd place by 43.6% pts]
   [Streak]
     short longest correct streak            :  14  (22.6%)
     moderate longest correct streak         :  33  (53.2%)

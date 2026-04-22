@@ -7,166 +7,166 @@ CLUSTER 0  (n=57 students)
 --------------------------------------------------
   [Accuracy]
     high accuracy                 :   0 students  (0.0%)
-    medium accuracy               :   0 students  (0.0%)
+    medium accuracy               :  57 students  (100.0%)
     low accuracy                  :   0 students  (0.0%)
-  → SELECTED: 'With high accuracy'  [Reason: dominant label (0.0% of students)]
+  → SELECTED: 'With medium accuracy'  [Reason: dominant label (100.0% of students)]
   [Speed]
-    responses are fast            :   0 students  (0.0%)
-    responses are moderate        :   0 students  (0.0%)
-    responses are slow            :   0 students  (0.0%)
-  → SELECTED: 'responses are mixed speed'  [Reason: top two options within 15pp of each other ('responses are fast' at 0.0% vs 2nd at 0.0%)]
+    responses are fast            :  11 students  (19.3%)
+    responses are moderate        :  19 students  (33.3%)
+    responses are slow            :  27 students  (47.4%)
+  → SELECTED: 'responses are mixed speed'  [Reason: top two options within 15pp of each other ('responses are slow' at 47.4% vs 2nd at 33.3%)]
   [Timing Variability]
-    stable in timing                   :   0 students  (0.0%)
-    moderately variable in timing      :   0 students  (0.0%)
-    highly variable in timing          :   0 students  (0.0%)
-  → SELECTED: 'mixed timing variability'  [Reason: top two options within 15pp of each other ('stable in timing' at 0.0% vs 2nd at 0.0%)]
+    stable in timing                   :  16 students  (28.1%)
+    moderately variable in timing      :  18 students  (31.6%)
+    highly variable in timing          :  23 students  (40.4%)
+  → SELECTED: 'mixed timing variability'  [Reason: top two options within 15pp of each other ('highly variable in timing' at 40.4% vs 2nd at 31.6%)]
   [Streak]
-    short longest correct streak            :   0  (0.0%)
-    moderate longest correct streak         :   0  (0.0%)
-    long longest correct streak             :   0  (0.0%)
-    short longest incorrect streak          :   0  (0.0%)
-    moderate longest incorrect streak       :   0  (0.0%)
-    long longest incorrect streak           :   0  (0.0%)
-  → SELECTED: 'short correct streak'  [Reason: both streaks significant — correct streak wins by count ('short longest correct streak' 0 vs 'short longest incorrect streak' 0)]
+    short correct streak                    :  38  (66.7%)
+    moderate correct streak                 :  19  (33.3%)
+    long correct streak                     :   0  (0.0%)
+    short incorrect streak                  :   9  (15.8%)
+    moderate incorrect streak               :  16  (28.1%)
+    long incorrect streak                   :  32  (56.1%)
+  → SELECTED: 'long incorrect streak'  [Reason: incorrect streak is significant (moderate+long = 84.2% beats short 15.8%); correct streaks are mostly short (66.7% vs 33.3% moderate+long)]
 
-  ★ FINAL KEYWORD: "With high accuracy, responses are mixed speed, mixed timing variability, short correct streak"
+  ★ FINAL KEYWORD: "With medium accuracy, responses are mixed speed, mixed timing variability, long incorrect streak"
 
 CLUSTER 1  (n=51 students)
 --------------------------------------------------
   [Accuracy]
     high accuracy                 :   0 students  (0.0%)
     medium accuracy               :   0 students  (0.0%)
-    low accuracy                  :   0 students  (0.0%)
-  → SELECTED: 'With high accuracy'  [Reason: dominant label (0.0% of students)]
+    low accuracy                  :  51 students  (100.0%)
+  → SELECTED: 'With low accuracy'  [Reason: dominant label (100.0% of students)]
   [Speed]
-    responses are fast            :   0 students  (0.0%)
-    responses are moderate        :   0 students  (0.0%)
-    responses are slow            :   0 students  (0.0%)
-  → SELECTED: 'responses are mixed speed'  [Reason: top two options within 15pp of each other ('responses are fast' at 0.0% vs 2nd at 0.0%)]
+    responses are fast            :  32 students  (62.7%)
+    responses are moderate        :  18 students  (35.3%)
+    responses are slow            :   1 students  (2.0%)
+  → SELECTED: 'responses are fast'  [Reason: clear winner 'responses are fast' (62.7%) leads 2nd place by 27.4% pts]
   [Timing Variability]
-    stable in timing                   :   0 students  (0.0%)
+    stable in timing                   :  51 students  (100.0%)
     moderately variable in timing      :   0 students  (0.0%)
     highly variable in timing          :   0 students  (0.0%)
-  → SELECTED: 'mixed timing variability'  [Reason: top two options within 15pp of each other ('stable in timing' at 0.0% vs 2nd at 0.0%)]
+  → SELECTED: 'stable in timing'  [Reason: clear winner 'stable in timing' (100.0%) leads 2nd place by 100.0% pts]
   [Streak]
-    short longest correct streak            :   0  (0.0%)
-    moderate longest correct streak         :   0  (0.0%)
-    long longest correct streak             :   0  (0.0%)
-    short longest incorrect streak          :   0  (0.0%)
-    moderate longest incorrect streak       :   0  (0.0%)
-    long longest incorrect streak           :   0  (0.0%)
-  → SELECTED: 'short correct streak'  [Reason: both streaks significant — correct streak wins by count ('short longest correct streak' 0 vs 'short longest incorrect streak' 0)]
+    short correct streak                    :  44  (86.3%)
+    moderate correct streak                 :   7  (13.7%)
+    long correct streak                     :   0  (0.0%)
+    short incorrect streak                  :   0  (0.0%)
+    moderate incorrect streak               :   1  (2.0%)
+    long incorrect streak                   :  50  (98.0%)
+  → SELECTED: 'long incorrect streak'  [Reason: incorrect streak is significant (moderate+long = 100.0% beats short 0.0%); correct streaks are mostly short (86.3% vs 13.7% moderate+long)]
 
-  ★ FINAL KEYWORD: "With high accuracy, responses are mixed speed, mixed timing variability, short correct streak"
+  ★ FINAL KEYWORD: "With low accuracy, responses are fast, stable in timing, long incorrect streak"
 
 CLUSTER 2  (n=85 students)
 --------------------------------------------------
   [Accuracy]
     high accuracy                 :   0 students  (0.0%)
-    medium accuracy               :   0 students  (0.0%)
+    medium accuracy               :  85 students  (100.0%)
     low accuracy                  :   0 students  (0.0%)
-  → SELECTED: 'With high accuracy'  [Reason: dominant label (0.0% of students)]
+  → SELECTED: 'With medium accuracy'  [Reason: dominant label (100.0% of students)]
   [Speed]
-    responses are fast            :   0 students  (0.0%)
-    responses are moderate        :   0 students  (0.0%)
+    responses are fast            :  59 students  (69.4%)
+    responses are moderate        :  26 students  (30.6%)
     responses are slow            :   0 students  (0.0%)
-  → SELECTED: 'responses are mixed speed'  [Reason: top two options within 15pp of each other ('responses are fast' at 0.0% vs 2nd at 0.0%)]
+  → SELECTED: 'responses are fast'  [Reason: clear winner 'responses are fast' (69.4%) leads 2nd place by 38.8% pts]
   [Timing Variability]
-    stable in timing                   :   0 students  (0.0%)
+    stable in timing                   :  85 students  (100.0%)
     moderately variable in timing      :   0 students  (0.0%)
     highly variable in timing          :   0 students  (0.0%)
-  → SELECTED: 'mixed timing variability'  [Reason: top two options within 15pp of each other ('stable in timing' at 0.0% vs 2nd at 0.0%)]
+  → SELECTED: 'stable in timing'  [Reason: clear winner 'stable in timing' (100.0%) leads 2nd place by 100.0% pts]
   [Streak]
-    short longest correct streak            :   0  (0.0%)
-    moderate longest correct streak         :   0  (0.0%)
-    long longest correct streak             :   0  (0.0%)
-    short longest incorrect streak          :   0  (0.0%)
-    moderate longest incorrect streak       :   0  (0.0%)
-    long longest incorrect streak           :   0  (0.0%)
-  → SELECTED: 'short correct streak'  [Reason: both streaks significant — correct streak wins by count ('short longest correct streak' 0 vs 'short longest incorrect streak' 0)]
+    short correct streak                    :   8  (9.4%)
+    moderate correct streak                 :  37  (43.5%)
+    long correct streak                     :  40  (47.1%)
+    short incorrect streak                  :  43  (50.6%)
+    moderate incorrect streak               :  17  (20.0%)
+    long incorrect streak                   :  25  (29.4%)
+  → SELECTED: 'long correct streak'  [Reason: correct streak is significant (moderate+long = 90.6% beats short 9.4%); incorrect streaks are mostly short (50.6% vs 49.4% moderate+long)]
 
-  ★ FINAL KEYWORD: "With high accuracy, responses are mixed speed, mixed timing variability, short correct streak"
+  ★ FINAL KEYWORD: "With medium accuracy, responses are fast, stable in timing, long correct streak"
 
 CLUSTER 3  (n=73 students)
 --------------------------------------------------
   [Accuracy]
-    high accuracy                 :   0 students  (0.0%)
+    high accuracy                 :  73 students  (100.0%)
     medium accuracy               :   0 students  (0.0%)
     low accuracy                  :   0 students  (0.0%)
-  → SELECTED: 'With high accuracy'  [Reason: dominant label (0.0% of students)]
+  → SELECTED: 'With high accuracy'  [Reason: dominant label (100.0% of students)]
   [Speed]
-    responses are fast            :   0 students  (0.0%)
-    responses are moderate        :   0 students  (0.0%)
-    responses are slow            :   0 students  (0.0%)
-  → SELECTED: 'responses are mixed speed'  [Reason: top two options within 15pp of each other ('responses are fast' at 0.0% vs 2nd at 0.0%)]
+    responses are fast            :  34 students  (46.6%)
+    responses are moderate        :  23 students  (31.5%)
+    responses are slow            :  16 students  (21.9%)
+  → SELECTED: 'responses are fast'  [Reason: clear winner 'responses are fast' (46.6%) leads 2nd place by 15.1% pts]
   [Timing Variability]
-    stable in timing                   :   0 students  (0.0%)
-    moderately variable in timing      :   0 students  (0.0%)
-    highly variable in timing          :   0 students  (0.0%)
-  → SELECTED: 'mixed timing variability'  [Reason: top two options within 15pp of each other ('stable in timing' at 0.0% vs 2nd at 0.0%)]
+    stable in timing                   :  25 students  (34.2%)
+    moderately variable in timing      :  28 students  (38.4%)
+    highly variable in timing          :  20 students  (27.4%)
+  → SELECTED: 'mixed timing variability'  [Reason: top two options within 15pp of each other ('moderately variable in timing' at 38.4% vs 2nd at 34.2%)]
   [Streak]
-    short longest correct streak            :   0  (0.0%)
-    moderate longest correct streak         :   0  (0.0%)
-    long longest correct streak             :   0  (0.0%)
-    short longest incorrect streak          :   0  (0.0%)
-    moderate longest incorrect streak       :   0  (0.0%)
-    long longest incorrect streak           :   0  (0.0%)
-  → SELECTED: 'short correct streak'  [Reason: both streaks significant — correct streak wins by count ('short longest correct streak' 0 vs 'short longest incorrect streak' 0)]
+    short correct streak                    :   0  (0.0%)
+    moderate correct streak                 :   7  (9.6%)
+    long correct streak                     :  66  (90.4%)
+    short incorrect streak                  :  71  (97.3%)
+    moderate incorrect streak               :   2  (2.7%)
+    long incorrect streak                   :   0  (0.0%)
+  → SELECTED: 'long correct streak'  [Reason: correct streak is significant (moderate+long = 100.0% beats short 0.0%); incorrect streaks are mostly short (97.3% vs 2.7% moderate+long)]
 
-  ★ FINAL KEYWORD: "With high accuracy, responses are mixed speed, mixed timing variability, short correct streak"
+  ★ FINAL KEYWORD: "With high accuracy, responses are fast, mixed timing variability, long correct streak"
 
 CLUSTER 4  (n=193 students)
 --------------------------------------------------
   [Accuracy]
     high accuracy                 :   0 students  (0.0%)
-    medium accuracy               :   0 students  (0.0%)
+    medium accuracy               : 193 students  (100.0%)
     low accuracy                  :   0 students  (0.0%)
-  → SELECTED: 'With high accuracy'  [Reason: dominant label (0.0% of students)]
+  → SELECTED: 'With medium accuracy'  [Reason: dominant label (100.0% of students)]
   [Speed]
-    responses are fast            :   0 students  (0.0%)
-    responses are moderate        :   0 students  (0.0%)
-    responses are slow            :   0 students  (0.0%)
-  → SELECTED: 'responses are mixed speed'  [Reason: top two options within 15pp of each other ('responses are fast' at 0.0% vs 2nd at 0.0%)]
+    responses are fast            :  30 students  (15.5%)
+    responses are moderate        :  76 students  (39.4%)
+    responses are slow            :  87 students  (45.1%)
+  → SELECTED: 'responses are mixed speed'  [Reason: top two options within 15pp of each other ('responses are slow' at 45.1% vs 2nd at 39.4%)]
   [Timing Variability]
     stable in timing                   :   0 students  (0.0%)
-    moderately variable in timing      :   0 students  (0.0%)
-    highly variable in timing          :   0 students  (0.0%)
-  → SELECTED: 'mixed timing variability'  [Reason: top two options within 15pp of each other ('stable in timing' at 0.0% vs 2nd at 0.0%)]
+    moderately variable in timing      : 101 students  (52.3%)
+    highly variable in timing          :  92 students  (47.7%)
+  → SELECTED: 'mixed timing variability'  [Reason: top two options within 15pp of each other ('moderately variable in timing' at 52.3% vs 2nd at 47.7%)]
   [Streak]
-    short longest correct streak            :   0  (0.0%)
-    moderate longest correct streak         :   0  (0.0%)
-    long longest correct streak             :   0  (0.0%)
-    short longest incorrect streak          :   0  (0.0%)
-    moderate longest incorrect streak       :   0  (0.0%)
-    long longest incorrect streak           :   0  (0.0%)
-  → SELECTED: 'short correct streak'  [Reason: both streaks significant — correct streak wins by count ('short longest correct streak' 0 vs 'short longest incorrect streak' 0)]
+    short correct streak                    :  27  (14.0%)
+    moderate correct streak                 :  91  (47.2%)
+    long correct streak                     :  75  (38.9%)
+    short incorrect streak                  :  95  (49.2%)
+    moderate incorrect streak               :  44  (22.8%)
+    long incorrect streak                   :  54  (28.0%)
+  → SELECTED: 'moderate correct streak'  [Reason: both streaks significant — correct wins by combined count (correct moderate+long = 166 vs incorrect moderate+long = 98)]
 
-  ★ FINAL KEYWORD: "With high accuracy, responses are mixed speed, mixed timing variability, short correct streak"
+  ★ FINAL KEYWORD: "With medium accuracy, responses are mixed speed, mixed timing variability, moderate correct streak"
 
 CLUSTER 5  (n=78 students)
 --------------------------------------------------
   [Accuracy]
     high accuracy                 :   0 students  (0.0%)
     medium accuracy               :   0 students  (0.0%)
-    low accuracy                  :   0 students  (0.0%)
-  → SELECTED: 'With high accuracy'  [Reason: dominant label (0.0% of students)]
+    low accuracy                  :  78 students  (100.0%)
+  → SELECTED: 'With low accuracy'  [Reason: dominant label (100.0% of students)]
   [Speed]
-    responses are fast            :   0 students  (0.0%)
-    responses are moderate        :   0 students  (0.0%)
-    responses are slow            :   0 students  (0.0%)
-  → SELECTED: 'responses are mixed speed'  [Reason: top two options within 15pp of each other ('responses are fast' at 0.0% vs 2nd at 0.0%)]
+    responses are fast            :  11 students  (14.1%)
+    responses are moderate        :  21 students  (26.9%)
+    responses are slow            :  46 students  (59.0%)
+  → SELECTED: 'responses are slow'  [Reason: clear winner 'responses are slow' (59.0%) leads 2nd place by 32.1% pts]
   [Timing Variability]
     stable in timing                   :   0 students  (0.0%)
-    moderately variable in timing      :   0 students  (0.0%)
-    highly variable in timing          :   0 students  (0.0%)
-  → SELECTED: 'mixed timing variability'  [Reason: top two options within 15pp of each other ('stable in timing' at 0.0% vs 2nd at 0.0%)]
+    moderately variable in timing      :  36 students  (46.2%)
+    highly variable in timing          :  42 students  (53.8%)
+  → SELECTED: 'mixed timing variability'  [Reason: top two options within 15pp of each other ('highly variable in timing' at 53.8% vs 2nd at 46.2%)]
   [Streak]
-    short longest correct streak            :   0  (0.0%)
-    moderate longest correct streak         :   0  (0.0%)
-    long longest correct streak             :   0  (0.0%)
-    short longest incorrect streak          :   0  (0.0%)
-    moderate longest incorrect streak       :   0  (0.0%)
-    long longest incorrect streak           :   0  (0.0%)
-  → SELECTED: 'short correct streak'  [Reason: both streaks significant — correct streak wins by count ('short longest correct streak' 0 vs 'short longest incorrect streak' 0)]
+    short correct streak                    :  64  (82.1%)
+    moderate correct streak                 :  14  (17.9%)
+    long correct streak                     :   0  (0.0%)
+    short incorrect streak                  :   0  (0.0%)
+    moderate incorrect streak               :   1  (1.3%)
+    long incorrect streak                   :  77  (98.7%)
+  → SELECTED: 'long incorrect streak'  [Reason: incorrect streak is significant (moderate+long = 100.0% beats short 0.0%); correct streaks are mostly short (82.1% vs 17.9% moderate+long)]
 
-  ★ FINAL KEYWORD: "With high accuracy, responses are mixed speed, mixed timing variability, short correct streak"
+  ★ FINAL KEYWORD: "With low accuracy, responses are slow, mixed timing variability, long incorrect streak"

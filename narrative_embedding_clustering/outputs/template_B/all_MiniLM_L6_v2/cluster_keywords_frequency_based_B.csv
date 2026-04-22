@@ -1,7 +1,7 @@
 Cluster,Keywords
-0,"With high accuracy, responses are mixed speed, mixed timing variability, short correct streak"
-1,"With high accuracy, responses are mixed speed, mixed timing variability, short correct streak"
-2,"With high accuracy, responses are mixed speed, mixed timing variability, short correct streak"
-3,"With high accuracy, responses are mixed speed, mixed timing variability, short correct streak"
-4,"With high accuracy, responses are mixed speed, mixed timing variability, short correct streak"
-5,"With high accuracy, responses are mixed speed, mixed timing variability, short correct streak"
+0,"With medium accuracy, responses are mixed speed, mixed timing variability, long incorrect streak"
+1,"With low accuracy, responses are fast, stable in timing, long incorrect streak"
+2,"With medium accuracy, responses are fast, stable in timing, long correct streak"
+3,"With high accuracy, responses are fast, mixed timing variability, long correct streak"
+4,"With medium accuracy, responses are mixed speed, mixed timing variability, moderate correct streak"
+5,"With low accuracy, responses are slow, mixed timing variability, long incorrect streak"

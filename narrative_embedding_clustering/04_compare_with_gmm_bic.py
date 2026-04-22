@@ -356,9 +356,17 @@ def save_cluster_keywords(df: pd.DataFrame, cluster_col: str) -> None:
 
         report_lines.extend(cluster_report)
 
-    out_path = OUTPUT_DIR / make_versioned_filename("cluster_keywords_frequency_based.csv")
-    pd.DataFrame(rows).to_csv(out_path, index=False)
-    print(f"Saved cluster keywords to {out_path}")
+    # Build summary table for end of report
+    report_lines.append("")
+    report_lines.append("=" * 72)
+    report_lines.append("FINAL KEYWORD SUMMARY TABLE")
+    report_lines.append("=" * 72)
+    report_lines.append("")
+    report_lines.append(f"{'Cluster':<10} {'Keywords'}")
+    report_lines.append("-" * 72)
+    for row in rows:
+        report_lines.append(f"{int(row['Cluster']):<10} {row['Keywords']}")
+    report_lines.append("=" * 72)
 
     report_path = OUTPUT_DIR / make_versioned_filename("cluster_keywords_report.txt")
     report_path.write_text("\n".join(report_lines), encoding="utf-8")

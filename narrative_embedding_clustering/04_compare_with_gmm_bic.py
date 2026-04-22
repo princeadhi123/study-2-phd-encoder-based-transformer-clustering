@@ -189,30 +189,45 @@ def save_cluster_keywords(df: pd.DataFrame, text_col: str, cluster_col: str, top
         cluster_parts.append(clean_acc)
 
         # ── 2. Speed ─────────────────────────────────────────────────────────
+        _DOMINANCE = 0.60  # winner must represent at least 60% of students to be labelled clearly
         speed_counts = {p: combined_text.count(p) for p in PHRASES['Speed']}
         best_speed = max(speed_counts, key=speed_counts.get)
+        best_speed_pct = speed_counts[best_speed] / n_students
 
         cluster_report.append("  [Speed]")
         for p, c in speed_counts.items():
             cluster_report.append(f"    {p:30s}: {c:3d} students  ({_pct(c, n_students)})")
-        cluster_report.append(
-            f"  → SELECTED: '{best_speed}'  "
-            f"[Reason: highest frequency ({_pct(speed_counts[best_speed], n_students)} of students)]"
-        )
-        cluster_parts.append(best_speed)
+        if best_speed_pct >= _DOMINANCE:
+            speed_label = best_speed
+            speed_reason = f"highest frequency ({_pct(speed_counts[best_speed], n_students)} of students, above 60% threshold)"
+        else:
+            speed_label = "responses are mixed speed"
+            speed_reason = (
+                f"no single speed dominates (best: '{best_speed}' at "
+                f"{_pct(speed_counts[best_speed], n_students)}, below 60% threshold)"
+            )
+        cluster_report.append(f"  → SELECTED: '{speed_label}'  [Reason: {speed_reason}]")
+        cluster_parts.append(speed_label)
 
         # ── 3. Timing variability ─────────────────────────────────────────────
         timing_counts = {p: combined_text.count(p) for p in PHRASES['Timing']}
         best_timing = max(timing_counts, key=timing_counts.get)
+        best_timing_pct = timing_counts[best_timing] / n_students
 
         cluster_report.append("  [Timing Variability]")
         for p, c in timing_counts.items():
             cluster_report.append(f"    {p:35s}: {c:3d} students  ({_pct(c, n_students)})")
-        cluster_report.append(
-            f"  → SELECTED: '{best_timing}'  "
-            f"[Reason: highest frequency ({_pct(timing_counts[best_timing], n_students)} of students)]"
-        )
-        cluster_parts.append(best_timing)
+        if best_timing_pct >= _DOMINANCE:
+            timing_label = best_timing
+            timing_reason = f"highest frequency ({_pct(timing_counts[best_timing], n_students)} of students, above 60% threshold)"
+        else:
+            timing_label = "mixed timing variability"
+            timing_reason = (
+                f"no single timing pattern dominates (best: '{best_timing}' at "
+                f"{_pct(timing_counts[best_timing], n_students)}, below 60% threshold)"
+            )
+        cluster_report.append(f"  → SELECTED: '{timing_label}'  [Reason: {timing_reason}]")
+        cluster_parts.append(timing_label)
 
         # ── 4. Streak ─────────────────────────────────────────────────────────
         streak_counts = {p: combined_text.count(p) for p in PHRASES['Streak']}

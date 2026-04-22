@@ -256,18 +256,18 @@ def save_cluster_keywords(df: pd.DataFrame, text_col: str, cluster_col: str, top
         if is_sig_correct and not is_sig_incorrect:
             selected_streak = best_correct_p
             streak_reason = (
-                f"correct streak is significant ('{best_correct_p}', "
-                f"{_pct(correct_streaks[best_correct_p], n_students)}) while incorrect streak "
-                f"is short/minor ('{best_incorrect_p}', "
-                f"{_pct(incorrect_streaks.get(best_incorrect_p, 0), n_students)})"
+                f"correct streak is significant ('{best_correct_p}' at "
+                f"{_pct(correct_streaks[best_correct_p], n_students)} of students); "
+                f"most students have only short incorrect streaks "
+                f"('{best_incorrect_p}' at {_pct(incorrect_streaks.get(best_incorrect_p, 0), n_students)})"
             )
         elif is_sig_incorrect and not is_sig_correct:
             selected_streak = best_incorrect_p
             streak_reason = (
-                f"incorrect streak is significant ('{best_incorrect_p}', "
-                f"{_pct(incorrect_streaks[best_incorrect_p], n_students)}) while correct streak "
-                f"is short/minor ('{best_correct_p}', "
-                f"{_pct(correct_streaks.get(best_correct_p, 0), n_students)})"
+                f"incorrect streak is significant ('{best_incorrect_p}' at "
+                f"{_pct(incorrect_streaks[best_incorrect_p], n_students)} of students); "
+                f"most students have only short correct streaks "
+                f"('{best_correct_p}' at {_pct(correct_streaks.get(best_correct_p, 0), n_students)})"
             )
         else:
             # Both significant or both minor — pick whichever has the higher raw count

@@ -205,13 +205,13 @@ def save_cluster_keywords(df: pd.DataFrame, text_col: str, cluster_col: str, top
             speed_label = best_speed
             speed_reason = (
                 f"clear winner '{best_speed}' ({_pct(speed_counts[best_speed], n_students)}) "
-                f"leads 2nd place by {_pct(int((speed_top_pct - speed_sec_pct) * n_students), n_students)} pts"
+                f"leads 2nd place by {(speed_top_pct - speed_sec_pct)*100:.1f}% pts"
             )
         else:
             speed_label = "responses are mixed speed"
             speed_reason = (
                 f"top two options within {_GAP_THRESHOLD*100:.0f}pp of each other "
-                f"('{best_speed}' at {_pct(speed_counts[best_speed], n_students)} vs 2nd at {_pct(int(speed_sec_pct * n_students), n_students)})"
+                f"('{best_speed}' at {_pct(speed_counts[best_speed], n_students)} vs 2nd at {speed_sec_pct*100:.1f}%)"
             )
         cluster_report.append(f"  → SELECTED: '{speed_label}'  [Reason: {speed_reason}]")
         cluster_parts.append(speed_label)
@@ -231,13 +231,13 @@ def save_cluster_keywords(df: pd.DataFrame, text_col: str, cluster_col: str, top
             timing_label = best_timing
             timing_reason = (
                 f"clear winner '{best_timing}' ({_pct(timing_counts[best_timing], n_students)}) "
-                f"leads 2nd place by {_pct(int((timing_top_pct - timing_sec_pct) * n_students), n_students)} pts"
+                f"leads 2nd place by {(timing_top_pct - timing_sec_pct)*100:.1f}% pts"
             )
         else:
             timing_label = "mixed timing variability"
             timing_reason = (
                 f"top two options within {_GAP_THRESHOLD*100:.0f}pp of each other "
-                f"('{best_timing}' at {_pct(timing_counts[best_timing], n_students)} vs 2nd at {_pct(int(timing_sec_pct * n_students), n_students)})"
+                f"('{best_timing}' at {_pct(timing_counts[best_timing], n_students)} vs 2nd at {timing_sec_pct*100:.1f}%)"
             )
         cluster_report.append(f"  → SELECTED: '{timing_label}'  [Reason: {timing_reason}]")
         cluster_parts.append(timing_label)

@@ -59,6 +59,35 @@ print(f"Computing LDA with {n_lda_components} components...")
 lda = LinearDiscriminantAnalysis(n_components=n_lda_components)
 X_lda = lda.fit_transform(X_pre, y)
 
+# === Enforce LDA sign orientation against behavioral anchors ===
+# LDA eigenvectors (like PCA) are only defined up to sign, so the 3D plot
+# can appear mirrored relative to any loadings heatmap. Anchor signs so
+# interpretation is stable across runs / across the heatmap.
+#   LD1 anchor: Accuracy should be NEGATIVE  (high perf -> neg LD1)
+#   LD2 anchor: RT Variance should be NEGATIVE
+#   LD3 anchor: Avg RT should be POSITIVE (slow -> positive LD3)
+DERIVED_FEATURES_PATH = Path(r"C:\Users\pdaadh\Desktop\Study-2\diagnostics\cluster input features\derived_features.csv")
+if DERIVED_FEATURES_PATH.exists():
+    print("Aligning LDA sign against behavioral anchors...")
+    feats = pd.read_csv(DERIVED_FEATURES_PATH)
+    ids_lda = df[mask]["IDCode"].values if not mask.all() else df["IDCode"].values
+    tmp = pd.DataFrame({"IDCode": ids_lda})
+    for i in range(n_lda_components):
+        tmp[f"ld{i+1}"] = X_lda[:, i]
+    anchors = tmp.merge(feats[["IDCode", "accuracy", "var_rt", "avg_rt"]], on="IDCode", how="inner")
+    if not anchors.empty:
+        if n_lda_components >= 1 and anchors[["ld1", "accuracy"]].corr().iloc[0, 1] > 0:
+            print("  -> Flipping LD1 sign (high Accuracy -> negative)")
+            X_lda[:, 0] *= -1
+        if n_lda_components >= 2 and anchors[["ld2", "var_rt"]].corr().iloc[0, 1] > 0:
+            print("  -> Flipping LD2 sign (high RT Variance -> negative)")
+            X_lda[:, 1] *= -1
+        if n_lda_components >= 3 and anchors[["ld3", "avg_rt"]].corr().iloc[0, 1] < 0:
+            print("  -> Flipping LD3 sign (slow RT -> positive)")
+            X_lda[:, 2] *= -1
+else:
+    print(f"[warn] Derived features not found at {DERIVED_FEATURES_PATH}; LDA signs not aligned.")
+
 # Standardize each axis to unit variance
 X_lda = X_lda / (X_lda.std(axis=0) + 1e-9)
 

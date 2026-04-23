@@ -590,6 +590,24 @@ def main() -> None:
         lda = LinearDiscriminantAnalysis(n_components=n_lda_components)
         X_lda_raw = lda.fit_transform(X_pre, y)
 
+        # Enforce sign convention (LD axes, like PCA axes, are sign-ambiguous).
+        # LD1: high Accuracy -> negative; LD2: high RT Variance -> negative;
+        # LD3: slow Avg RT -> positive.
+        if DERIVED_FEATURES_PATH.exists():
+            _feats_sign = pd.read_csv(DERIVED_FEATURES_PATH)
+            _ids_sign = coords[mask]["IDCode"].values if not mask.all() else coords["IDCode"].values
+            _tmp_sign = pd.DataFrame({"IDCode": _ids_sign})
+            for _i in range(n_lda_components):
+                _tmp_sign[f"ld{_i+1}"] = X_lda_raw[:, _i]
+            _anc = _tmp_sign.merge(_feats_sign[["IDCode", "accuracy", "var_rt", "avg_rt"]], on="IDCode", how="inner")
+            if not _anc.empty:
+                if n_lda_components >= 1 and _anc[["ld1", "accuracy"]].corr().iloc[0, 1] > 0:
+                    X_lda_raw[:, 0] *= -1
+                if n_lda_components >= 2 and _anc[["ld2", "var_rt"]].corr().iloc[0, 1] > 0:
+                    X_lda_raw[:, 1] *= -1
+                if n_lda_components >= 3 and _anc[["ld3", "avg_rt"]].corr().iloc[0, 1] < 0:
+                    X_lda_raw[:, 2] *= -1
+
         # Standardise each axis to unit variance so neither LD dominates visually
         X_lda = X_lda_raw / (X_lda_raw.std(axis=0) + 1e-9)
 

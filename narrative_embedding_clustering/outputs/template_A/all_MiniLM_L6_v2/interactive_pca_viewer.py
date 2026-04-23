@@ -8,17 +8,16 @@ Features: zoom, pan, hover tooltips, toggle clusters, lasso select.
 import numpy as np
 import pandas as pd
 from sklearn.decomposition import PCA
-from sklearn.preprocessing import StandardScaler
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 from pathlib import Path
 
 # Paths
 BASE_DIR = Path(__file__).resolve().parent
-OUTPUT_DIR = BASE_DIR / "outputs" / "template_A" / "all_MiniLM_L6_v2"
+OUTPUT_DIR = BASE_DIR
 EMB_PATH = OUTPUT_DIR / "embeddings.npy"
 INDEX_PATH = OUTPUT_DIR / "embeddings_index.csv"
 CLUSTERS_PATH = OUTPUT_DIR / "narrative_clusters.csv"
+DERIVED_FEATURES_PATH = Path(r"C:\Users\pdaadh\Desktop\Study-2\diagnostics\cluster input features\derived_features.csv")
 
 # Load data
 print("Loading embeddings...")
@@ -29,12 +28,35 @@ clusters_df = pd.read_csv(CLUSTERS_PATH)
 # Merge data
 df = index_df.merge(clusters_df[["IDCode", "narrative_best_label"]], on="IDCode")
 
-# Perform PCA
+# Perform PCA (match 05_visualize_embeddings.py: NO StandardScaler)
 print("Computing PCA...")
-scaler = StandardScaler()
-X_scaled = scaler.fit_transform(embeddings)
-pca = PCA(n_components=10)  # Compute first 10 PCs
-X_pca = pca.fit_transform(X_scaled)
+pca = PCA(n_components=10, random_state=42)
+X_pca = pca.fit_transform(embeddings)
+
+# === Enforce PCA sign orientation against behavioral anchors ===
+# Matches _enforce_pca_orientation() in 05_visualize_embeddings.py so the
+# 3D plot signs are consistent with the loadings heatmap.
+#   PC1 anchor: Accuracy should be NEGATIVE  (high perf -> neg PC1)
+#   PC2 anchor: RT Variance should be NEGATIVE
+#   PC3 anchor: Avg RT should be POSITIVE (slow -> positive PC3)
+if DERIVED_FEATURES_PATH.exists():
+    print("Aligning PCA sign against behavioral anchors...")
+    feats = pd.read_csv(DERIVED_FEATURES_PATH)
+    tmp = df[["IDCode"]].copy()
+    tmp["pc1"], tmp["pc2"], tmp["pc3"] = X_pca[:, 0], X_pca[:, 1], X_pca[:, 2]
+    anchors = tmp.merge(feats[["IDCode", "accuracy", "var_rt", "avg_rt"]], on="IDCode", how="inner")
+    if not anchors.empty:
+        if anchors[["pc1", "accuracy"]].corr().iloc[0, 1] > 0:
+            print("  -> Flipping PC1 sign (high Accuracy -> negative)")
+            X_pca[:, 0] *= -1
+        if anchors[["pc2", "var_rt"]].corr().iloc[0, 1] > 0:
+            print("  -> Flipping PC2 sign (high RT Variance -> negative)")
+            X_pca[:, 1] *= -1
+        if anchors[["pc3", "avg_rt"]].corr().iloc[0, 1] < 0:
+            print("  -> Flipping PC3 sign (slow RT -> positive)")
+            X_pca[:, 2] *= -1
+else:
+    print(f"[warn] Derived features not found at {DERIVED_FEATURES_PATH}; PCA signs not aligned with heatmap.")
 
 # Add PCA coordinates to dataframe
 df["PC1"] = X_pca[:, 0]

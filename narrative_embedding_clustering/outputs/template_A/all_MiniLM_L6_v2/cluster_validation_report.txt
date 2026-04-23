@@ -1,0 +1,233 @@
+==============================================================================
+CLUSTER & PCA VALIDATION REPORT
+Template A | all-MiniLM-L6-v2 | N = 537 students | K = 8 clusters
+==============================================================================
+
+Global population thresholds (33rd / 67th percentile):
+  accuracy                        low ≤    0.649   high ≥    0.789
+  avg_rt                          low ≤   14.671   high ≥   19.420
+  var_rt                          low ≤  155.924   high ≥  329.564
+  longest_correct_streak          low ≤   11.000   high ≥   18.000
+  longest_incorrect_streak        low ≤    3.000   high ≥    5.000
+  accuracy (absolute)              low ≤ 0.600      high ≥ 0.850  (from narrative generator)
+
+PCA variance explained: PC1=38.2%, PC2=20.2%, PC3=15.3%
+Sign convention: PC1-high = low accuracy; PC2-high = stable timing; PC3-high = slow RT
+
+==============================================================================
+CLUSTER 0  (n = 47)
+------------------------------------------------------------------------------
+Keyword report claim: medium accuracy | moderate speed | mixed timing | long correct streak
+
+Feature ranges (min | 25% | median | 75% | max | mean±sd):
+  accuracy                        0.68 |    0.79 |    0.81 |    0.82 |    0.84  |    0.81 ±  0.03
+  avg_rt                         14.74 |   15.81 |   16.68 |   17.83 |   19.13  |   16.83 ±  1.31
+  var_rt                         84.96 |  148.10 |  213.60 |  319.61 | 1082.30  |  268.47 ± 180.59
+  longest_correct_streak          9.00 |   16.00 |   19.00 |   22.50 |   38.00  |   20.15 ±  5.95
+  longest_incorrect_streak        1.00 |    2.00 |    3.00 |    4.00 |   17.00  |    3.60 ±  2.48
+  consecutive_correct_rate        0.66 |    0.66 |    0.70 |    0.71 |    0.79  |    0.70 ±  0.04
+
+Empirical profile (cluster medians -> category):
+  accuracy        median=0.807  -> medium
+  avg_rt          median=16.68   -> moderate
+  var_rt          median=213.60   -> moderately variable
+  correct_streak  median=19      -> long
+  incorrect_streak median=3     -> short
+
+PCA 3D centroid: PC1=-1.27, PC2=+0.77, PC3=-0.34
+Within-cluster spread (mean axis std): 0.18
+Nearest cluster in PCA space : C7 (d=0.93)
+Farthest cluster in PCA space: C1 (d=3.14)
+Mean silhouette (3D PCA): +0.551  [>0.25 well-separated; <0 overlapping]
+
+==============================================================================
+CLUSTER 1  (n = 90)
+------------------------------------------------------------------------------
+Keyword report claim: low accuracy | mixed speed | mixed timing | long incorrect streak
+
+Feature ranges (min | 25% | median | 75% | max | mean±sd):
+  accuracy                        0.09 |    0.30 |    0.46 |    0.54 |    0.60  |    0.42 ±  0.14
+  avg_rt                          3.82 |   12.90 |   19.77 |   22.37 |   33.09  |   18.00 ±  6.66
+  var_rt                          6.47 |  104.80 |  264.11 |  490.89 | 2198.61  |  354.38 ± 349.67
+  longest_correct_streak          2.00 |    5.00 |    7.00 |   10.00 |   15.00  |    7.53 ±  3.07
+  longest_incorrect_streak        4.00 |    9.00 |   13.00 |   21.50 |   37.00  |   15.16 ±  8.59
+  consecutive_correct_rate        0.02 |    0.16 |    0.28 |    0.39 |    0.50  |    0.28 ±  0.12
+
+Empirical profile (cluster medians -> category):
+  accuracy        median=0.456  -> low
+  avg_rt          median=19.77   -> slow
+  var_rt          median=264.11   -> moderately variable
+  correct_streak  median=7      -> short
+  incorrect_streak median=13     -> long
+
+PCA 3D centroid: PC1=+1.77, PC2=+0.10, PC3=+0.04
+Within-cluster spread (mean axis std): 0.36
+Nearest cluster in PCA space : C5 (d=2.01)
+Farthest cluster in PCA space: C0 (d=3.14)
+Mean silhouette (3D PCA): +0.554  [>0.25 well-separated; <0 overlapping]
+
+==============================================================================
+CLUSTER 2  (n = 85)
+------------------------------------------------------------------------------
+Keyword report claim: medium accuracy | slow | highly variable timing | long incorrect streak
+
+Feature ranges (min | 25% | median | 75% | max | mean±sd):
+  accuracy                        0.61 |    0.65 |    0.70 |    0.74 |    0.79  |    0.69 ±  0.05
+  avg_rt                         19.46 |   21.12 |   22.38 |   24.61 |   33.55  |   23.53 ±  3.62
+  var_rt                        140.24 |  290.50 |  454.28 |  654.80 | 2182.39  |  601.07 ± 456.08
+  longest_correct_streak          6.00 |   10.00 |   12.00 |   15.00 |   31.00  |   13.46 ±  4.67
+  longest_incorrect_streak        2.00 |    4.00 |    4.00 |    6.00 |   13.00  |    4.98 ±  2.24
+  consecutive_correct_rate        0.38 |    0.50 |    0.54 |    0.61 |    0.64  |    0.54 ±  0.06
+
+Empirical profile (cluster medians -> category):
+  accuracy        median=0.702  -> medium
+  avg_rt          median=22.38   -> slow
+  var_rt          median=454.28   -> highly variable
+  correct_streak  median=12      -> moderate
+  incorrect_streak median=4     -> moderate
+
+PCA 3D centroid: PC1=-0.02, PC2=-0.62, PC3=+1.47
+Within-cluster spread (mean axis std): 0.19
+Nearest cluster in PCA space : C4 (d=1.40)
+Farthest cluster in PCA space: C3 (d=3.40)
+Mean silhouette (3D PCA): +0.707  [>0.25 well-separated; <0 overlapping]
+
+==============================================================================
+CLUSTER 3  (n = 57)
+------------------------------------------------------------------------------
+Keyword report claim: high accuracy | fast | mixed timing | long correct streak
+
+Feature ranges (min | 25% | median | 75% | max | mean±sd):
+  accuracy                        0.86 |    0.88 |    0.88 |    0.93 |    0.98  |    0.90 ±  0.03
+  avg_rt                          8.57 |   11.78 |   13.47 |   16.11 |   19.32  |   13.91 ±  2.81
+  var_rt                         62.83 |  113.63 |  163.22 |  235.44 |  946.50  |  206.74 ± 145.36
+  longest_correct_streak         12.00 |   21.00 |   26.00 |   31.00 |   51.00  |   27.00 ±  8.68
+  longest_incorrect_streak        1.00 |    1.00 |    2.00 |    2.00 |    4.00  |    1.93 ±  0.75
+  consecutive_correct_rate        0.73 |    0.79 |    0.80 |    0.88 |    0.96  |    0.82 ±  0.06
+
+Empirical profile (cluster medians -> category):
+  accuracy        median=0.877  -> high
+  avg_rt          median=13.47   -> fast
+  var_rt          median=163.22   -> moderately variable
+  correct_streak  median=26      -> long
+  incorrect_streak median=2     -> short
+
+PCA 3D centroid: PC1=-0.09, PC2=-0.69, PC3=-1.93
+Within-cluster spread (mean axis std): 0.44
+Nearest cluster in PCA space : C6 (d=1.82)
+Farthest cluster in PCA space: C2 (d=3.40)
+Mean silhouette (3D PCA): +0.468  [>0.25 well-separated; <0 overlapping]
+
+==============================================================================
+CLUSTER 4  (n = 45)
+------------------------------------------------------------------------------
+Keyword report claim: medium-to-high accuracy | slow | highly variable timing | long correct streak
+
+Feature ranges (min | 25% | median | 75% | max | mean±sd):
+  accuracy                        0.72 |    0.81 |    0.82 |    0.88 |    0.91  |    0.83 ±  0.05
+  avg_rt                         19.43 |   20.82 |   22.89 |   24.98 |   32.40  |   23.48 ±  3.16
+  var_rt                        176.86 |  324.01 |  462.06 |  761.83 | 1753.74  |  614.31 ± 392.39
+  longest_correct_streak         11.00 |   17.00 |   23.00 |   30.00 |   40.00  |   23.44 ±  7.93
+  longest_incorrect_streak        1.00 |    2.00 |    3.00 |    3.00 |   10.00  |    3.07 ±  1.60
+  consecutive_correct_rate        0.66 |    0.70 |    0.73 |    0.80 |    0.84  |    0.74 ±  0.06
+
+Empirical profile (cluster medians -> category):
+  accuracy        median=0.825  -> medium
+  avg_rt          median=22.89   -> slow
+  var_rt          median=462.06   -> highly variable
+  correct_streak  median=23      -> long
+  incorrect_streak median=3     -> short
+
+PCA 3D centroid: PC1=-0.09, PC2=-1.33, PC3=+0.27
+Within-cluster spread (mean axis std): 0.51
+Nearest cluster in PCA space : C6 (d=0.99)
+Farthest cluster in PCA space: C5 (d=3.53)
+Mean silhouette (3D PCA): +0.137  [>0.25 well-separated; <0 overlapping]
+
+==============================================================================
+CLUSTER 5  (n = 39)
+------------------------------------------------------------------------------
+Keyword report claim: low accuracy | moderate speed | mixed timing | long incorrect streak
+
+Feature ranges (min | 25% | median | 75% | max | mean±sd):
+  accuracy                        0.16 |    0.43 |    0.53 |    0.54 |    0.60  |    0.47 ±  0.11
+  avg_rt                         14.67 |   15.87 |   17.14 |   18.09 |   19.42  |   17.04 ±  1.41
+  var_rt                         31.89 |  119.93 |  161.07 |  237.28 |  720.56  |  204.22 ± 140.64
+  longest_correct_streak          3.00 |    6.00 |    7.00 |   12.00 |   17.00  |    8.67 ±  3.93
+  longest_incorrect_streak        4.00 |    7.00 |    9.00 |   14.00 |   27.00  |   11.00 ±  5.62
+  consecutive_correct_rate        0.05 |    0.23 |    0.34 |    0.40 |    0.48  |    0.32 ±  0.11
+
+Empirical profile (cluster medians -> category):
+  accuracy        median=0.526  -> low
+  avg_rt          median=17.14   -> moderate
+  var_rt          median=161.07   -> moderately variable
+  correct_streak  median=7      -> short
+  incorrect_streak median=9     -> long
+
+PCA 3D centroid: PC1=+1.09, PC2=+1.90, PC3=-0.51
+Within-cluster spread (mean axis std): 0.17
+Nearest cluster in PCA space : C1 (d=2.01)
+Farthest cluster in PCA space: C4 (d=3.53)
+Mean silhouette (3D PCA): +0.805  [>0.25 well-separated; <0 overlapping]
+
+==============================================================================
+CLUSTER 6  (n = 100)
+------------------------------------------------------------------------------
+Keyword report claim: medium accuracy | fast | stable timing | moderate correct streak
+
+Feature ranges (min | 25% | median | 75% | max | mean±sd):
+  accuracy                        0.61 |    0.70 |    0.77 |    0.82 |    0.84  |    0.76 ±  0.07
+  avg_rt                          8.30 |   11.60 |   13.06 |   14.08 |   14.66  |   12.60 ±  1.66
+  var_rt                         22.30 |   83.20 |  117.99 |  168.07 |  416.01  |  136.74 ± 72.22
+  longest_correct_streak          7.00 |   13.00 |   16.00 |   21.00 |   42.00  |   17.80 ±  6.79
+  longest_incorrect_streak        2.00 |    3.00 |    3.00 |    5.00 |   13.00  |    4.02 ±  2.27
+  consecutive_correct_rate        0.41 |    0.55 |    0.64 |    0.71 |    0.79  |    0.63 ±  0.09
+
+Empirical profile (cluster medians -> category):
+  accuracy        median=0.772  -> medium
+  avg_rt          median=13.06   -> fast
+  var_rt          median=117.99   -> stable
+  correct_streak  median=16      -> moderate
+  incorrect_streak median=3     -> short
+
+PCA 3D centroid: PC1=-0.64, PC2=-0.64, PC3=-0.20
+Within-cluster spread (mean axis std): 0.31
+Nearest cluster in PCA space : C4 (d=0.99)
+Farthest cluster in PCA space: C5 (d=3.09)
+Mean silhouette (3D PCA): +0.481  [>0.25 well-separated; <0 overlapping]
+
+==============================================================================
+CLUSTER 7  (n = 74)
+------------------------------------------------------------------------------
+Keyword report claim: medium accuracy | moderate speed | moderately variable timing | moderate correct streak
+
+Feature ranges (min | 25% | median | 75% | max | mean±sd):
+  accuracy                        0.61 |    0.65 |    0.72 |    0.75 |    0.79  |    0.70 ±  0.05
+  avg_rt                         14.71 |   16.15 |   16.89 |   18.38 |   19.37  |   17.11 ±  1.34
+  var_rt                         80.42 |  160.98 |  231.99 |  334.52 |  801.09  |  278.05 ± 172.02
+  longest_correct_streak          6.00 |   11.00 |   14.00 |   16.00 |   28.00  |   14.30 ±  4.90
+  longest_incorrect_streak        2.00 |    3.00 |    4.00 |    5.00 |   13.00  |    4.91 ±  2.66
+  consecutive_correct_rate        0.38 |    0.50 |    0.57 |    0.61 |    0.64  |    0.56 ±  0.07
+
+Empirical profile (cluster medians -> category):
+  accuracy        median=0.719  -> medium
+  avg_rt          median=16.89   -> moderate
+  var_rt          median=231.99   -> moderately variable
+  correct_streak  median=14      -> moderate
+  incorrect_streak median=4     -> moderate
+
+PCA 3D centroid: PC1=-0.92, PC2=+1.31, PC3=+0.34
+Within-cluster spread (mean axis std): 0.23
+Nearest cluster in PCA space : C0 (d=0.93)
+Farthest cluster in PCA space: C3 (d=3.14)
+Mean silhouette (3D PCA): +0.444  [>0.25 well-separated; <0 overlapping]
+
+==============================================================================
+GLOBAL SUMMARY
+==============================================================================
+Overall mean silhouette (3D PCA): +0.523
+
+PCA sign-convention validation (Pearson r between axis and anchor):
+  PC1 vs accuracy : -0.728  (expect strongly NEGATIVE)
+  PC2 vs var_rt   : -0.182  (expect NEGATIVE)
+  PC3 vs avg_rt   : +0.632  (expect POSITIVE)

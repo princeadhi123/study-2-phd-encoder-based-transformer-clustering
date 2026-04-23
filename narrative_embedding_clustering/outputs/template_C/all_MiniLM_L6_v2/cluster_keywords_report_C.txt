@@ -27,7 +27,7 @@ CLUSTER 0  (n=13 students)
     short incorrect streak                  :   0  (0.0%)
     moderate incorrect streak               :   1  (7.7%)
     long incorrect streak                   :  12  (92.3%)
-  → SELECTED: 'long incorrect streak'  [Reason: both streaks significant — incorrect wins by combined count (incorrect moderate+long = 13 vs correct moderate+long = 6)]
+  → SELECTED: 'long incorrect streak'  [Reason: incorrect streak is significant (moderate+long = 100.0% beats short 0.0%); correct streaks are mostly short (53.8% vs 46.2% moderate+long)]
 
   ★ FINAL KEYWORD: "With low accuracy, responses are slow, moderately variable in timing, long incorrect streak"
 

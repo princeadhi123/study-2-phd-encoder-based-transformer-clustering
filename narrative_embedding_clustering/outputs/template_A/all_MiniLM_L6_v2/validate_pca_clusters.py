@@ -31,13 +31,17 @@ pca = PCA(n_components=3, random_state=42)
 X = pca.fit_transform(EMB)
 
 anchor = idx.merge(clusters, on="IDCode").merge(
-    feats[["IDCode", "accuracy", "var_rt", "avg_rt"]], on="IDCode"
+    feats[["IDCode", "accuracy", "consecutive_correct_rate", "avg_rt"]], on="IDCode"
 )
 anchor["pc1"], anchor["pc2"], anchor["pc3"] = X[:, 0], X[:, 1], X[:, 2]
 
+# Sign convention:
+#   PC1-high  -> low accuracy            (so flip if corr(PC1, accuracy) > 0)
+#   PC2-high  -> low correct-consistency (so flip if corr(PC2, consecutive_correct_rate) > 0)
+#   PC3-high  -> slow response time      (so flip if corr(PC3, avg_rt) < 0)
 if anchor[["pc1", "accuracy"]].corr().iloc[0, 1] > 0:
     X[:, 0] *= -1
-if anchor[["pc2", "var_rt"]].corr().iloc[0, 1] > 0:
+if anchor[["pc2", "consecutive_correct_rate"]].corr().iloc[0, 1] > 0:
     X[:, 1] *= -1
 if anchor[["pc3", "avg_rt"]].corr().iloc[0, 1] < 0:
     X[:, 2] *= -1
@@ -100,7 +104,7 @@ lines.append("")
 lines.append(f"PCA variance explained: PC1={pca.explained_variance_ratio_[0]:.1%}, "
              f"PC2={pca.explained_variance_ratio_[1]:.1%}, "
              f"PC3={pca.explained_variance_ratio_[2]:.1%}")
-lines.append("Sign convention: PC1-high = low accuracy; PC2-high = stable timing; PC3-high = slow RT")
+lines.append("Sign convention: PC1-high = low accuracy; PC2-high = low correct-consistency; PC3-high = slow RT")
 lines.append("")
 
 # Cluster centroids for separation ranking
@@ -178,10 +182,20 @@ lines.append("=" * 78)
 lines.append(f"Overall mean silhouette (3D PCA): {master['silhouette'].mean():+.3f}")
 lines.append("")
 lines.append("PCA sign-convention validation (Pearson r between axis and anchor):")
-anchor_r = master[["PC1", "PC2", "PC3", "accuracy", "var_rt", "avg_rt"]].corr()
-lines.append(f"  PC1 vs accuracy : {anchor_r.loc['PC1', 'accuracy']:+.3f}  (expect strongly NEGATIVE)")
-lines.append(f"  PC2 vs var_rt   : {anchor_r.loc['PC2', 'var_rt']:+.3f}  (expect NEGATIVE)")
-lines.append(f"  PC3 vs avg_rt   : {anchor_r.loc['PC3', 'avg_rt']:+.3f}  (expect POSITIVE)")
+anchor_r = master[["PC1", "PC2", "PC3",
+                   "accuracy", "consecutive_correct_rate", "avg_rt",
+                   "var_rt", "longest_correct_streak", "longest_incorrect_streak"]].corr()
+lines.append(f"  PC1 vs accuracy                 : {anchor_r.loc['PC1', 'accuracy']:+.3f}  (expect strongly NEGATIVE)")
+lines.append(f"  PC2 vs consecutive_correct_rate : {anchor_r.loc['PC2', 'consecutive_correct_rate']:+.3f}  (expect NEGATIVE)")
+lines.append(f"  PC3 vs avg_rt                   : {anchor_r.loc['PC3', 'avg_rt']:+.3f}  (expect POSITIVE)")
+lines.append("")
+lines.append("Supplementary correlations (all features vs PCs):")
+for feat in ["accuracy", "consecutive_correct_rate", "longest_correct_streak",
+             "longest_incorrect_streak", "avg_rt", "var_rt"]:
+    r1 = anchor_r.loc['PC1', feat]
+    r2 = anchor_r.loc['PC2', feat]
+    r3 = anchor_r.loc['PC3', feat]
+    lines.append(f"  {feat:28s}  PC1={r1:+.3f}  PC2={r2:+.3f}  PC3={r3:+.3f}")
 lines.append("")
 
 out = BASE / "cluster_validation_report.txt"

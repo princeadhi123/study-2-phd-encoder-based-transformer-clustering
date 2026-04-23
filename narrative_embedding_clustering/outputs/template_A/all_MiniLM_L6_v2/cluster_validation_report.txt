@@ -12,7 +12,7 @@ Global population thresholds (33rd / 67th percentile):
   accuracy (absolute)              low ≤ 0.600      high ≥ 0.850  (from narrative generator)
 
 PCA variance explained: PC1=38.2%, PC2=20.2%, PC3=15.3%
-Sign convention: PC1-high = low accuracy; PC2-high = stable timing; PC3-high = slow RT
+Sign convention: PC1-high = low accuracy; PC2-high = low correct-consistency; PC3-high = slow RT
 
 ==============================================================================
 CLUSTER 0  (n = 47)
@@ -228,6 +228,14 @@ GLOBAL SUMMARY
 Overall mean silhouette (3D PCA): +0.523
 
 PCA sign-convention validation (Pearson r between axis and anchor):
-  PC1 vs accuracy : -0.728  (expect strongly NEGATIVE)
-  PC2 vs var_rt   : -0.182  (expect NEGATIVE)
-  PC3 vs avg_rt   : +0.632  (expect POSITIVE)
+  PC1 vs accuracy                 : -0.728  (expect strongly NEGATIVE)
+  PC2 vs consecutive_correct_rate : -0.421  (expect NEGATIVE)
+  PC3 vs avg_rt                   : +0.632  (expect POSITIVE)
+
+Supplementary correlations (all features vs PCs):
+  accuracy                      PC1=-0.728  PC2=-0.387  PC3=-0.221
+  consecutive_correct_rate      PC1=-0.696  PC2=-0.421  PC3=-0.301
+  longest_correct_streak        PC1=-0.446  PC2=-0.403  PC3=-0.387
+  longest_incorrect_streak      PC1=+0.622  PC2=+0.228  PC3=+0.070
+  avg_rt                        PC1=+0.181  PC2=-0.099  PC3=+0.632
+  var_rt                        PC1=+0.113  PC2=-0.182  PC3=+0.446

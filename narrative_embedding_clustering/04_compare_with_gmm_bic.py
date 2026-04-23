@@ -304,13 +304,8 @@ def save_cluster_keywords(df: pd.DataFrame, cluster_col: str) -> None:
         cor_sig_count = max(cor["moderate"], cor["long"])
         inc_sig_count = max(inc["moderate"], inc["long"])
 
-        # A streak family is "significant" (moderate+long dominate) when they
-        # beat short outright OR when short leads by less than _GAP_THRESHOLD —
-        # i.e. the gap is too close to call "mostly short".
-        cor_gap = (cor["short"] - cor_sig_n) / n_students if n_students else 0.0
-        inc_gap = (inc["short"] - inc_sig_n) / n_students if n_students else 0.0
-        is_sig_correct   = cor_sig_n >= cor["short"] or cor_gap < _GAP_THRESHOLD
-        is_sig_incorrect = inc_sig_n >= inc["short"] or inc_gap < _GAP_THRESHOLD
+        is_sig_correct   = cor_sig_n > cor["short"]
+        is_sig_incorrect = inc_sig_n > inc["short"]
 
         if is_sig_correct and not is_sig_incorrect:
             selected_streak = cor_sig_label

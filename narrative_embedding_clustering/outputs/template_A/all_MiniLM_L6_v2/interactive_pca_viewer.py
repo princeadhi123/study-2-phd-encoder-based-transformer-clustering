@@ -58,6 +58,9 @@ if DERIVED_FEATURES_PATH.exists():
 else:
     print(f"[warn] Derived features not found at {DERIVED_FEATURES_PATH}; PCA signs not aligned with heatmap.")
 
+# Standardize each axis to unit variance (matches 05_visualize_embeddings.py pipeline)
+X_pca = X_pca / (X_pca.std(axis=0) + 1e-9)
+
 # Add PCA coordinates to dataframe
 df["PC1"] = X_pca[:, 0]
 df["PC2"] = X_pca[:, 1]

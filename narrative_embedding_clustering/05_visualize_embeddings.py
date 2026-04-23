@@ -268,6 +268,67 @@ def _plot_pca_heatmap(loadings: pd.DataFrame) -> None:
     print(f"Saved PCA loadings heatmap to {out_path}")
 
 
+def _plot_lda_loadings(X_lda_raw: np.ndarray, df_features: pd.DataFrame, expl: np.ndarray) -> None:
+    """Compute and plot Pearson correlations between raw LD scores and numeric features."""
+    feature_map = {
+        "n_items":                  "Items Attempted",
+        "accuracy":                 "Accuracy",
+        "consecutive_correct_rate": "Consec. Correct Rate",
+        "longest_correct_streak":   "Max Correct Streak",
+        "longest_incorrect_streak": "Max Incorrect Streak",
+        "avg_rt":                   "Avg Response Time",
+        "var_rt":                   "RT Variance",
+        "rt_cv":                    "RT Coeff. Variation",
+    }
+    valid_cols = [c for c in feature_map if c in df_features.columns]
+    n_ld = X_lda_raw.shape[1]
+    ld_names = [f"LD{i+1} ({expl[i]*100:.1f}%)" for i in range(n_ld)]
+
+    lda_df = pd.DataFrame(X_lda_raw, columns=[f"LD{i+1}" for i in range(n_ld)])
+    lda_df["IDCode"] = df_features["IDCode"].values[:len(lda_df)] if "IDCode" in df_features.columns else range(len(lda_df))
+
+    merged = lda_df.merge(df_features[["IDCode"] + valid_cols], on="IDCode", how="inner") if "IDCode" in df_features.columns else pd.concat([lda_df, df_features[valid_cols].reset_index(drop=True)], axis=1)
+
+    ld_cols = [f"LD{i+1}" for i in range(n_ld)]
+    corr = merged[ld_cols + valid_cols].corr(method="pearson").loc[valid_cols, ld_cols]
+
+    # Rename for display
+    corr.index = [feature_map[c] for c in corr.index]
+    corr.columns = ld_names
+
+    # Fill NaN (constant features) with 0
+    const_mask = corr.isna().all(axis=1)
+    if const_mask.any():
+        corr = corr.copy()
+        corr.loc[const_mask] = 0.0
+        corr.index = [f"{n}\n(const.)" if const_mask[i] else n for i, n in enumerate(corr.index)]
+
+    fig, ax = plt.subplots(figsize=(max(6, n_ld * 2 + 2), 6))
+    sns.heatmap(
+        corr.T,
+        annot=True,
+        cmap="coolwarm",
+        center=0,
+        vmin=-1,
+        vmax=1,
+        ax=ax,
+        fmt=".2f",
+        linewidths=0.5,
+        cbar_kws={"label": "Pearson r"},
+    )
+    ax.set_title("LDA Loadings: Feature Correlations with Discriminant Axes", fontsize=13, pad=12)
+    plt.xticks(rotation=45, ha="right")
+    plt.yticks(rotation=0)
+
+    figures_dir = OUTPUT_DIR / "figures"
+    figures_dir.mkdir(parents=True, exist_ok=True)
+    out_path = figures_dir / make_versioned_filename("lda_loadings_heatmap.png")
+    fig.tight_layout()
+    fig.savefig(out_path, dpi=300)
+    plt.close(fig)
+    print(f"Saved LDA loadings heatmap to {out_path}")
+
+
 def _plot_narrative_k_selection() -> None:
     # Load the latest model results
     pattern = "model_results_narrative*.csv"
@@ -525,11 +586,12 @@ def main() -> None:
         pca_pre = PCA(n_components=n_pre, random_state=42)
         X_pre = pca_pre.fit_transform(X_for_lda)
 
-        lda = LinearDiscriminantAnalysis(n_components=2)
-        X_lda = lda.fit_transform(X_pre, y)
+        n_lda_components = min(3, n_classes - 1)
+        lda = LinearDiscriminantAnalysis(n_components=n_lda_components)
+        X_lda_raw = lda.fit_transform(X_pre, y)
 
         # Standardise each axis to unit variance so neither LD dominates visually
-        X_lda = X_lda / (X_lda.std(axis=0) + 1e-9)
+        X_lda = X_lda_raw / (X_lda_raw.std(axis=0) + 1e-9)
 
         coords_lda = coords[mask].copy() if not mask.all() else coords.copy()
         coords_lda["dim1"] = X_lda[:, 0]
@@ -546,6 +608,22 @@ def main() -> None:
             x_label=f"LD1 ({expl[0]:.1%} between-cluster var)",
             y_label=f"LD2 ({expl[1]:.1%} between-cluster var)",
         )
+
+        # LDA loadings heatmap (feature correlations with LD axes)
+        if DERIVED_FEATURES_PATH.exists():
+            df_features_lda = pd.read_csv(DERIVED_FEATURES_PATH)
+            with np.errstate(divide="ignore", invalid="ignore"):
+                if "accuracy" not in df_features_lda.columns and "total_correct" in df_features_lda.columns:
+                    df_features_lda["accuracy"] = df_features_lda["total_correct"] / df_features_lda["n_items"].replace(0, np.nan)
+                if "rt_cv" not in df_features_lda.columns and "var_rt" in df_features_lda.columns and "avg_rt" in df_features_lda.columns:
+                    df_features_lda["rt_cv"] = np.sqrt(df_features_lda["var_rt"].clip(lower=0)) / df_features_lda["avg_rt"].replace(0, np.nan)
+            # Align features to the same students used for LDA
+            lda_ids = coords_lda["IDCode"].values if "IDCode" in coords_lda.columns else None
+            if lda_ids is not None:
+                df_features_lda = df_features_lda[df_features_lda["IDCode"].isin(lda_ids)].reset_index(drop=True)
+            _plot_lda_loadings(X_lda_raw, df_features_lda, expl)
+        else:
+            print("Derived features not found; skipping LDA loadings heatmap.")
 
 
 if __name__ == "__main__":

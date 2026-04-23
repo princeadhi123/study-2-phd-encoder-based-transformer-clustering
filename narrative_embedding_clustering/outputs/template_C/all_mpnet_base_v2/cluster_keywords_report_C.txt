@@ -27,7 +27,7 @@ CLUSTER 0  (n=2 students)
     short incorrect streak                  :   1  (50.0%)
     moderate incorrect streak               :   1  (50.0%)
     long incorrect streak                   :   0  (0.0%)
-  → SELECTED: 'moderate correct streak'  [Reason: correct streak is significant (moderate+long = 100.0% beats short 0.0%); incorrect streaks are mostly short (50.0% vs 50.0% moderate+long)]
+  → SELECTED: 'moderate correct streak'  [Reason: both streaks significant — correct wins by combined count (correct moderate+long = 2 vs incorrect moderate+long = 1)]
 
   ★ FINAL KEYWORD: "With medium accuracy, responses are mixed speed, highly variable in timing, moderate correct streak"
 
@@ -139,7 +139,7 @@ CLUSTER 4  (n=6 students)
     short incorrect streak                  :   3  (50.0%)
     moderate incorrect streak               :   0  (0.0%)
     long incorrect streak                   :   3  (50.0%)
-  → SELECTED: 'long incorrect streak'  [Reason: neither streak family is significant (correct short=66.7%, incorrect short=50.0%); reporting larger non-short bucket for context]
+  → SELECTED: 'long incorrect streak'  [Reason: incorrect streak is significant (moderate+long = 50.0% beats short 50.0%); correct streaks are mostly short (66.7% vs 33.3% moderate+long)]
 
   ★ FINAL KEYWORD: "With medium accuracy, responses are moderate, moderately variable in timing, long incorrect streak"
 
@@ -167,7 +167,7 @@ CLUSTER 5  (n=93 students)
     short incorrect streak                  :  49  (52.7%)
     moderate incorrect streak               :  16  (17.2%)
     long incorrect streak                   :  28  (30.1%)
-  → SELECTED: 'long correct streak'  [Reason: correct streak is significant (moderate+long = 79.6% beats short 20.4%); incorrect streaks are mostly short (52.7% vs 47.3% moderate+long)]
+  → SELECTED: 'long correct streak'  [Reason: both streaks significant — correct wins by combined count (correct moderate+long = 74 vs incorrect moderate+long = 44)]
 
   ★ FINAL KEYWORD: "With medium-to-high accuracy, responses are mixed speed, highly variable in timing, long correct streak"
 

@@ -195,7 +195,7 @@ CLUSTER 6  (n=100 students)
     short incorrect streak                  :  53  (53.0%)
     moderate incorrect streak               :  19  (19.0%)
     long incorrect streak                   :  28  (28.0%)
-  → SELECTED: 'moderate correct streak'  [Reason: correct streak is significant (moderate+long = 86.0% beats short 14.0%); incorrect streaks are mostly short (53.0% vs 47.0% moderate+long)]
+  → SELECTED: 'moderate correct streak'  [Reason: both streaks significant — correct wins by combined count (correct moderate+long = 86 vs incorrect moderate+long = 47)]
 
   ★ FINAL KEYWORD: "With medium accuracy, responses are fast, stable in timing, moderate correct streak"
 

@@ -303,11 +303,8 @@ def _plot_lda_loadings(X_lda_raw: np.ndarray, df_features: pd.DataFrame, expl: n
         corr.loc[const_mask] = 0.0
         corr.index = [f"{n}\n(const.)" if const_mask[i] else n for i, n in enumerate(corr.index)]
 
-    # Adjust figure size to prevent x-axis label overlap
-    fig_width = max(8, n_ld * 1.5 + 2)
-    fig_height = max(4, len(corr.columns) * 0.4 + 1)
-    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
-    
+    fig, ax = plt.subplots(figsize=(14, 5))
+
     sns.heatmap(
         corr.T,
         annot=True,
@@ -320,9 +317,9 @@ def _plot_lda_loadings(X_lda_raw: np.ndarray, df_features: pd.DataFrame, expl: n
         linewidths=0.5,
         cbar_kws={"label": "Pearson r"},
     )
-    ax.set_title("LDA Loadings: Feature Correlations with Discriminant Axes", fontsize=13, pad=12)
-    plt.xticks(rotation=45, ha="right", fontsize=10)
-    plt.yticks(rotation=0, fontsize=10)
+    ax.set_title("LDA Loadings: Feature Correlations with Discriminant Axes", fontsize=14, pad=15)
+    plt.xticks(rotation=45, ha="right")
+    plt.yticks(rotation=0)
 
     figures_dir = OUTPUT_DIR / "figures"
     figures_dir.mkdir(parents=True, exist_ok=True)

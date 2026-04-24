@@ -390,12 +390,27 @@ def analyze_lda_loadings(X: np.ndarray, labels: np.ndarray, feature_names: list,
     if EXCLUDED_PLOT_FEATURES:
         keep_idx = [f for f in loadings_df.index if f not in EXCLUDED_PLOT_FEATURES]
         loadings_df = loadings_df.loc[keep_idx]
-    plt.figure(figsize=(8, max(6, len(feature_names) * 0.4)))
-    sns.heatmap(loadings_df, annot=True, cmap="coolwarm", center=0, fmt=".2f")
-    plt.title("LDA Loadings (Feature Contributions to LDs)")
-    plt.tight_layout()
-    plt.savefig(out_dir / "lda_loadings_heatmap.png", dpi=150)
-    plt.close()
+    # Transpose so LDs are rows and features are columns (horizontal layout)
+    fig, ax = plt.subplots(figsize=(14, 5))
+    vmax_abs = float(np.nanmax(np.abs(loadings_df.values))) or 1.0
+    sns.heatmap(
+        loadings_df.T,
+        annot=True,
+        cmap="coolwarm",
+        center=0,
+        vmin=-vmax_abs,
+        vmax=vmax_abs,
+        ax=ax,
+        fmt=".2f",
+        linewidths=0.5,
+        cbar_kws={"label": "Pearson r"},
+    )
+    ax.set_title("LDA Loadings: Feature Correlations with Discriminant Axes", fontsize=14, pad=15)
+    plt.xticks(rotation=45, ha="right")
+    plt.yticks(rotation=0)
+    fig.tight_layout()
+    fig.savefig(out_dir / "lda_loadings_heatmap.png", dpi=300)
+    plt.close(fig)
     print("\n=== Top LDA Loadings ===")
     for i in range(n_show):
         ld_loadings = loadings_df.iloc[:, i]

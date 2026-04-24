@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
+import seaborn as sns
 from pathlib import Path
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
@@ -63,51 +64,30 @@ load_df = pd.DataFrame(loadings, index=FEATURE_LABELS, columns=pc_labels)
 print(load_df.to_string(float_format=lambda x: f"{x:+.3f}"))
 print(f"\nTotal variance explained: {sum(var):.1%}")
 
-# ── Plot ───────────────────────────────────────────────────────────────────────
-# Adjust figure size for better layout and spacing
-fig_width = max(5, len(pc_labels) * 1.2 + 1)
-fig_height = max(5, len(FEATURE_LABELS) * 0.6 + 2)
-fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+# ── Plot (matching narrative embedding heatmap style) ─────────────────────────
+# Transpose so PCs are rows and features are columns (horizontal layout)
+pc_row_labels = [f"PC1 ({var[0]:.1%})", f"PC2 ({var[1]:.1%})", f"PC3 ({var[2]:.1%})"]
+loadings_df = pd.DataFrame(loadings.T, index=pc_row_labels, columns=FEATURE_LABELS)
 
-cmap = 'coolwarm'
-norm = mcolors.TwoSlopeNorm(vmin=-1, vcenter=0, vmax=1)
-
-im = ax.imshow(loadings, cmap=cmap, norm=norm, aspect="auto")
-
-# ── Cell annotations ──────────────────────────────────────────────────────────
-for i in range(len(FEATURE_LABELS)):
-    for j in range(3):
-        val = loadings[i, j]
-        txt_color = "white" if abs(val) > 0.45 else "#222222"
-        ax.text(j, i, f"{val:+.3f}",
-                ha="center", va="center",
-                fontsize=11, fontweight="bold",
-                color=txt_color)
-
-# ── Axes formatting ────────────────────────────────────────────────────────────
-ax.set_xticks(range(3))
-ax.set_xticklabels(pc_labels, fontsize=10)
-ax.set_yticks(range(len(FEATURE_LABELS)))
-ax.set_yticklabels(FEATURE_LABELS, fontsize=10)
-ax.tick_params(length=0)
-
-# grid lines between cells
-for x in np.arange(-0.5, 3, 1):
-    ax.axvline(x, color="white", linewidth=1.5)
-for y in np.arange(-0.5, len(FEATURE_LABELS), 1):
-    ax.axhline(y, color="white", linewidth=1.5)
-
-ax.set_title(
-    "PCA Loadings: Feature Contributions to Axes",
-    fontsize=12, pad=14
+fig, ax = plt.subplots(figsize=(14, 5))
+sns.heatmap(
+    loadings_df,
+    annot=True,
+    cmap="coolwarm",
+    center=0,
+    vmin=-1,
+    vmax=1,
+    ax=ax,
+    fmt=".2f",
+    linewidths=0.5,
+    cbar_kws={"label": "Correlation"},
 )
+ax.set_title("PCA Loadings: Feature Contributions to Axes", fontsize=14, pad=15)
 
-cbar = fig.colorbar(im, ax=ax, fraction=0.03, pad=0.02)
-cbar.set_label("Loading", fontsize=10)
-cbar.set_ticks([-1, -0.5, 0, 0.5, 1])
-cbar.ax.tick_params(labelsize=9)
+plt.xticks(rotation=45, ha="right")
+plt.yticks(rotation=0)
 
-plt.tight_layout()
-fig.savefig(str(OUT_PNG), dpi=200, bbox_inches="tight")
+fig.tight_layout()
+fig.savefig(str(OUT_PNG), dpi=300)
 print(f"\nSaved: {OUT_PNG}")
 plt.close()

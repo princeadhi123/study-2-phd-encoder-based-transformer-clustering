@@ -303,7 +303,11 @@ def _plot_lda_loadings(X_lda_raw: np.ndarray, df_features: pd.DataFrame, expl: n
         corr.loc[const_mask] = 0.0
         corr.index = [f"{n}\n(const.)" if const_mask[i] else n for i, n in enumerate(corr.index)]
 
-    fig, ax = plt.subplots(figsize=(max(6, n_ld * 2 + 2), 6))
+    # Adjust figure size to prevent x-axis label overlap
+    fig_width = max(8, n_ld * 1.5 + 2)
+    fig_height = max(4, len(corr.columns) * 0.4 + 1)
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    
     sns.heatmap(
         corr.T,
         annot=True,
@@ -317,14 +321,14 @@ def _plot_lda_loadings(X_lda_raw: np.ndarray, df_features: pd.DataFrame, expl: n
         cbar_kws={"label": "Pearson r"},
     )
     ax.set_title("LDA Loadings: Feature Correlations with Discriminant Axes", fontsize=13, pad=12)
-    plt.xticks(rotation=45, ha="right")
-    plt.yticks(rotation=0)
+    plt.xticks(rotation=45, ha="right", fontsize=10)
+    plt.yticks(rotation=0, fontsize=10)
 
     figures_dir = OUTPUT_DIR / "figures"
     figures_dir.mkdir(parents=True, exist_ok=True)
     out_path = figures_dir / make_versioned_filename("lda_loadings_heatmap.png")
-    fig.tight_layout()
-    fig.savefig(out_path, dpi=300)
+    plt.tight_layout()
+    fig.savefig(out_path, dpi=300, bbox_inches='tight')
     plt.close(fig)
     print(f"Saved LDA loadings heatmap to {out_path}")
 

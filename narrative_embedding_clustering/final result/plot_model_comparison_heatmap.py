@@ -146,9 +146,9 @@ def plot_heatmap(df):
     plt.figure(figsize=(9, 3.5))
     sns.set_context("paper", font_scale=1.0)
     
-    # RdBu_r palette (reversed red-blue diverging), for visual consistency
+    # coolwarm palette, for visual consistency with PCA loadings heatmap
     # across the final-result figures.
-    cmap = "RdBu_r"
+    cmap = "coolwarm"
     
     ax = sns.heatmap(
         plot_data, annot=True, fmt=".4f", cmap=cmap, linewidths=.5,

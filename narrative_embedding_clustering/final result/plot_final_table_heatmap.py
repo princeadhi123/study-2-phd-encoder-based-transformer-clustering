@@ -120,7 +120,7 @@ def main():
         data=color_df, 
         annot=annot_df, 
         fmt=".4f", 
-        cmap="RdBu_r", 
+        cmap="coolwarm", 
         linewidths=.5,
         cbar_kws={'label': 'Relative Performance', 'shrink': 1.0}
     )

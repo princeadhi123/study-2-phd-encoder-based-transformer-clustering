@@ -539,7 +539,7 @@ def plot_cluster_profiles(data):
     vmax = float(np.nanmax(np.abs(z.values)))
     vmax = max(1.0, min(3.0, vmax))
 
-    sns.heatmap(z, ax=ax, cmap="RdBu_r", center=0, vmin=-vmax, vmax=vmax,
+    sns.heatmap(z, ax=ax, cmap="coolwarm", center=0, vmin=-vmax, vmax=vmax,
                 annot=prof[subj_cols].values, fmt=".1f", annot_kws={"size": 9},
                 linewidths=0.5, linecolor="#f0f0f0",
                 cbar_kws={"label": "z-score", "shrink": 0.8})

@@ -67,7 +67,7 @@ def _save_zmean_heatmap(df: pd.DataFrame, cluster_col: str, value_cols: list, ou
     fig, ax = plt.subplots(figsize=(fig_w, fig_h))
     ax = sns.heatmap(
         mat,
-        cmap="RdBu_r",
+        cmap="coolwarm",
         center=0,
         vmin=vmin,
         vmax=vmax,

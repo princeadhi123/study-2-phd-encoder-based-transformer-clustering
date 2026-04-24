@@ -325,7 +325,7 @@ def analyze_pca_loadings(X: np.ndarray, feature_names: list, out_dir: Path):
         loadings_df = loadings_df.loc[keep_idx]
     
     plt.figure(figsize=(8, max(6, len(feature_names) * 0.4)))
-    sns.heatmap(loadings_df, annot=True, cmap="RdBu_r", center=0, fmt=".2f")
+    sns.heatmap(loadings_df, annot=True, cmap="coolwarm", center=0, fmt=".2f")
     plt.title("PCA Loadings (Feature Correlations with PCs)")
     plt.tight_layout()
     plt.savefig(out_dir / "pca_loadings_heatmap.png", dpi=150)
@@ -391,7 +391,7 @@ def analyze_lda_loadings(X: np.ndarray, labels: np.ndarray, feature_names: list,
         keep_idx = [f for f in loadings_df.index if f not in EXCLUDED_PLOT_FEATURES]
         loadings_df = loadings_df.loc[keep_idx]
     plt.figure(figsize=(8, max(6, len(feature_names) * 0.4)))
-    sns.heatmap(loadings_df, annot=True, cmap="RdBu_r", center=0, fmt=".2f")
+    sns.heatmap(loadings_df, annot=True, cmap="coolwarm", center=0, fmt=".2f")
     plt.title("LDA Loadings (Feature Contributions to LDs)")
     plt.tight_layout()
     plt.savefig(out_dir / "lda_loadings_heatmap.png", dpi=150)
@@ -579,7 +579,7 @@ def _save_zmean_heatmap(df: pd.DataFrame, feature_cols: list, cluster_col: str, 
     plt.figure(figsize=(fig_w, fig_h))
     ax = sns.heatmap(
         zmean,
-        cmap="RdBu_r",
+        cmap="coolwarm",
         center=0,
         vmin=vmin,
         vmax=vmax,

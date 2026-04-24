@@ -64,12 +64,12 @@ print(load_df.to_string(float_format=lambda x: f"{x:+.3f}"))
 print(f"\nTotal variance explained: {sum(var):.1%}")
 
 # ── Plot ───────────────────────────────────────────────────────────────────────
-fig, ax = plt.subplots(figsize=(5.5, 6.5))
+# Adjust figure size for better layout and spacing
+fig_width = max(5, len(pc_labels) * 1.2 + 1)
+fig_height = max(5, len(FEATURE_LABELS) * 0.6 + 2)
+fig, ax = plt.subplots(figsize=(fig_width, fig_height))
 
-cmap = mcolors.LinearSegmentedColormap.from_list(
-    "div_rw",
-    ["#1a3a8f", "#6fa8dc", "#f5f5f5", "#e06c5b", "#9b2226"]
-)
+cmap = 'coolwarm'
 norm = mcolors.TwoSlopeNorm(vmin=-1, vcenter=0, vmax=1)
 
 im = ax.imshow(loadings, cmap=cmap, norm=norm, aspect="auto")
@@ -86,9 +86,9 @@ for i in range(len(FEATURE_LABELS)):
 
 # ── Axes formatting ────────────────────────────────────────────────────────────
 ax.set_xticks(range(3))
-ax.set_xticklabels(pc_labels, fontsize=11)
+ax.set_xticklabels(pc_labels, fontsize=10)
 ax.set_yticks(range(len(FEATURE_LABELS)))
-ax.set_yticklabels(FEATURE_LABELS, fontsize=11)
+ax.set_yticklabels(FEATURE_LABELS, fontsize=10)
 ax.tick_params(length=0)
 
 # grid lines between cells
@@ -98,8 +98,7 @@ for y in np.arange(-0.5, len(FEATURE_LABELS), 1):
     ax.axhline(y, color="white", linewidth=1.5)
 
 ax.set_title(
-    f"PCA Loadings — Numeric GMM (AICc best: k=5, cov=full)\n"
-    f"Total variance explained: {sum(var):.1%}",
+    "PCA Loadings: Feature Contributions to Axes",
     fontsize=12, pad=14
 )
 
@@ -111,4 +110,4 @@ cbar.ax.tick_params(labelsize=9)
 plt.tight_layout()
 fig.savefig(str(OUT_PNG), dpi=200, bbox_inches="tight")
 print(f"\nSaved: {OUT_PNG}")
-plt.show()
+plt.close()

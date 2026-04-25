@@ -98,8 +98,8 @@ def _convex_hull_trace(pts, color, opacity=0.35):
         i=simplices[:, 0], j=simplices[:, 1], k=simplices[:, 2],
         color=color,
         opacity=opacity,
-        flatshading=True,
-        lighting=dict(ambient=0.8, diffuse=0.5),
+        flatshading=False,
+        lighting=dict(ambient=1.0, diffuse=0.0, specular=0.0, roughness=1.0),
         hoverinfo="skip",
         showlegend=False
     )
@@ -135,7 +135,7 @@ def create_figure(camera_eye, title_suffix=""):
             continue
         col = colors.get(int(cluster_id), "#888888")
         try:
-            fig.add_trace(_convex_hull_trace(pts, col, opacity=0.35))
+            fig.add_trace(_convex_hull_trace(pts, col, opacity=0.25))
         except Exception:
             pass  # skip degenerate clusters
 
@@ -158,7 +158,7 @@ def create_figure(camera_eye, title_suffix=""):
     # Axis titles with interpretation
     fig.update_layout(
         title=dict(
-            text=f"3D PCA — Numeric GMM (AICc best: k=5, cov=full) [N={len(master)}, silhouette={sil_score:.3f}]{title_suffix}",
+            text=f"3D PCA — Numeric Clusters (GMM-AICc){title_suffix}",
             font=dict(size=14, family="Arial"),
             x=0.5
         ),
@@ -166,33 +166,51 @@ def create_figure(camera_eye, title_suffix=""):
             xaxis=dict(
                 title=dict(text=f"PC1 ({pca.explained_variance_ratio_[0]:.1%} variance)", font=dict(size=10)),
                 showgrid=True,
-                gridwidth=0.5,
-                gridcolor="lightgray",
+                gridwidth=2,
+                gridcolor="rgba(100,100,100,0.6)",
                 showbackground=True,
-                backgroundcolor="rgba(240,240,255,0.5)"
+                backgroundcolor="rgba(220,230,255,0.85)",
+                showline=True,
+                linecolor="#555",
+                linewidth=2,
+                zeroline=True,
+                zerolinecolor="#888",
+                zerolinewidth=2
             ),
             yaxis=dict(
                 title=dict(text=f"PC2 ({pca.explained_variance_ratio_[1]:.1%} variance)", font=dict(size=10)),
                 showgrid=True,
-                gridwidth=0.5,
-                gridcolor="lightgray",
+                gridwidth=2,
+                gridcolor="rgba(100,100,100,0.6)",
                 showbackground=True,
-                backgroundcolor="rgba(240,255,240,0.5)"
+                backgroundcolor="rgba(220,255,230,0.85)",
+                showline=True,
+                linecolor="#555",
+                linewidth=2,
+                zeroline=True,
+                zerolinecolor="#888",
+                zerolinewidth=2
             ),
             zaxis=dict(
                 title=dict(text=f"PC3 ({pca.explained_variance_ratio_[2]:.1%} variance)", font=dict(size=10)),
                 showgrid=True,
-                gridwidth=0.5,
-                gridcolor="lightgray",
+                gridwidth=2,
+                gridcolor="rgba(100,100,100,0.6)",
                 showbackground=True,
-                backgroundcolor="rgba(255,245,235,0.5)"
+                backgroundcolor="rgba(255,238,220,0.85)",
+                showline=True,
+                linecolor="#555",
+                linewidth=2,
+                zeroline=True,
+                zerolinecolor="#888",
+                zerolinewidth=2
             ),
             camera=dict(
                 eye=dict(x=camera_eye[0], y=camera_eye[1], z=camera_eye[2]),
                 center=dict(x=0, y=0, z=0),
                 up=dict(x=0, y=0, z=1)
             ),
-            aspectmode="data"
+            aspectmode="cube"
         ),
         legend=dict(
             title=dict(text="Clusters", font=dict(size=10)),

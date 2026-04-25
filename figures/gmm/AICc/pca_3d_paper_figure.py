@@ -285,8 +285,10 @@ fig = create_figure(best_eye)
 html_path = OUTPUT_DIR / "pca_3d_paper_interactive.html"
 fig.write_html(str(html_path), include_plotlyjs="cdn")
 print(f"Saved: {html_path}")
-print("Open the HTML in your browser, rotate to the best angle, then use")
-print("the camera icon (top-right toolbar) or a screenshot to save for paper.")
+
+png_path = OUTPUT_DIR / "pca_3d_paper_figure.png"
+fig.write_image(str(png_path), format="png", width=950, height=750, scale=6.25)
+print(f"Saved: {png_path}  (600 DPI equivalent)")
 
 # Print cluster stats
 print("\n" + "="*60)

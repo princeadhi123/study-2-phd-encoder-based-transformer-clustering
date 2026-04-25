@@ -127,12 +127,12 @@ def create_figure(camera_eye, title_suffix=""):
             continue
         col = colors.get(int(cluster_id), "#888888")
         try:
-            fig.add_trace(_convex_hull_trace(pts, col, opacity=0.30))
+            fig.add_trace(_convex_hull_trace(pts, col, opacity=0.35))
         except Exception:
             pass  # skip degenerate clusters
 
-    # Cluster labels — large bold black, always on top
-    label_z_offset = 0.25
+    # Cluster labels — large bold black, always on top (higher z to avoid hiding)
+    label_z_offset = 0.40
     for cluster_id, row in centroids.iterrows():
         fig.add_trace(go.Scatter3d(
             x=[row["PC1"]],

@@ -865,7 +865,7 @@ def run_external_validity():
     from scipy import stats
     
     THETA_COLS = ["T10_theta_TOTAL", "T10_theta_S1", "T10_theta_S2",
-                  "T10_theta_S3", "T10_theta_S5", "T10_theta_S6"]
+                  "T10_theta_S3", "T10_theta_S4", "T10_theta_S5"]
     PERC_COLS = ["self_perception_1", "self_perception_2", "self_perception_4",
                  "self_perception_5", "self_perception_6", "MEAN_PERCPT"]
     

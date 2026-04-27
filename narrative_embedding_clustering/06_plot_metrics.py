@@ -319,7 +319,7 @@ def plot_anova_subjects_numeric(anova_df: pd.DataFrame) -> None:
     figures_dir = base_dir / "figures"
     figures_dir.mkdir(parents=True, exist_ok=True)
 
-    subject_outcomes = {"S1", "S2", "S3", "S5", "S6"}
+    subject_outcomes = {"S1", "S2", "S3", "S4", "S5"}
     baselines = ["gmm_aicc_best_label"]
 
     sub = anova_df[anova_df["outcome"].isin(subject_outcomes)]
@@ -340,7 +340,7 @@ def plot_anova_subjects_numeric(anova_df: pd.DataFrame) -> None:
     bars = ax.bar(x, values, width=0.5)
     ax.set_xticks(list(x))
     ax.set_xticklabels(labels, rotation=15)
-    ax.set_ylabel("Mean eta-squared (subjects S1, S2, S3, S5, S6)")
+    ax.set_ylabel("Mean eta-squared (subjects S1, S2, S3, S4, S5)")
     ax.set_title("ANOVA effect size (subjects): numeric GMM clusters")
     ax.grid(True, axis="y", alpha=0.2)
 
@@ -355,7 +355,7 @@ def plot_anova_subjects_numeric(anova_df: pd.DataFrame) -> None:
 def plot_anova_subjects_numeric_by_outcome(anova_df: pd.DataFrame) -> None:
     """Plot eta-squared for each subject separately for numeric GMM clusters.
 
-    X-axis: subject (S1, S2, S3, S5, S6).
+    X-axis: subject (S1, S2, S3, S4, S5).
     Bars: gmm_aic_best_label.
     Aggregated over templates and embedding models.
     """
@@ -371,7 +371,7 @@ def plot_anova_subjects_numeric_by_outcome(anova_df: pd.DataFrame) -> None:
     figures_dir = base_dir / "figures"
     figures_dir.mkdir(parents=True, exist_ok=True)
 
-    subject_outcomes = ["S1", "S2", "S3", "S5", "S6"]
+    subject_outcomes = ["S1", "S2", "S3", "S4", "S5"]
     baselines = ["gmm_aicc_best_label"]
 
     sub = anova_df[anova_df["outcome"].isin(subject_outcomes)]
@@ -442,7 +442,7 @@ def plot_anova_subjects_narrative_per_template_model(anova_df: pd.DataFrame) -> 
     figures_dir = base_dir / "figures"
     figures_dir.mkdir(parents=True, exist_ok=True)
 
-    subject_outcomes = ["S1", "S2", "S3", "S5", "S6"]
+    subject_outcomes = ["S1", "S2", "S3", "S4", "S5"]
 
     sub = anova_df[anova_df["outcome"].isin(subject_outcomes)]
     sub = sub[sub["cluster_label"] == "narrative_best_label"]
@@ -542,7 +542,7 @@ def plot_mean_eta_comparison(anova_df: pd.DataFrame) -> None:
     figures_dir = base_dir / "figures"
     figures_dir.mkdir(parents=True, exist_ok=True)
 
-    subjects = ["S1", "S2", "S3", "S5", "S6"]
+    subjects = ["S1", "S2", "S3", "S4", "S5"]
     
     # Filter for relevant outcomes
     df_sub = anova_df[anova_df["outcome"].isin(subjects)].copy()
@@ -621,7 +621,7 @@ def plot_mean_eta_comparison(anova_df: pd.DataFrame) -> None:
                 fontweight='bold'
             )
 
-    plt.title("Predictive Power Comparison: Mean Eta-Squared (S1-S6)", fontsize=14, fontweight='bold')
+    plt.title("Predictive Power Comparison: Mean Eta-Squared (S1-S5)", fontsize=14, fontweight='bold')
     plt.ylabel("Mean Eta-Squared (Higher is Stronger)", fontsize=12)
     plt.xlabel("")
     plt.ylim(0, 1.0)

@@ -957,6 +957,58 @@ def plot_representational_validity(data):
 
 
 # ══════════════════════════════════════════════════════════════════════════
+# FIGURE 12: External Validity — Theta Line Chart (S1–S5)
+# ══════════════════════════════════════════════════════════════════════════
+
+
+def plot_theta_line_chart_s1_s5():
+    """Line chart: cluster theta means across subjects S1–S5."""
+    df = pd.read_csv(RESULTS_DIR / "external_validity_theta_cluster_means.csv")
+
+    # Keep only S1–S5 columns
+    subj_cols = [c for c in df.columns if c.startswith("T10_theta_S")]
+    subj_labels = [c.replace("T10_theta_", "") for c in subj_cols]
+
+    # Narrative cluster colours — matched to 3D PCA plot (pca_3d_paper_figure.py)
+    cluster_colors = [
+        "#e6194b",   # C0 vivid red
+        "#3cb44b",   # C1 vivid green
+        "#4363d8",   # C2 vivid blue
+        "#ff9900",   # C3 vivid amber
+        "#9b0dff",   # C4 vivid violet
+        "#00c8c8",   # C5 vivid teal
+        "#ff69b4",   # C6 vivid hot pink
+        "#8b4513",   # C7 vivid brown
+    ]
+
+    fig, ax = plt.subplots(figsize=(9, 5.5))
+
+    x = np.arange(len(subj_labels))
+    for idx, (_, row) in enumerate(df.iterrows()):
+        cid = int(row["narrative_best_label"])
+        vals = row[subj_cols].values.astype(float)
+        ax.plot(x, vals, marker="o", linewidth=2.2, markersize=7,
+                color=cluster_colors[idx % len(cluster_colors)], label=f"C{cid}", zorder=3)
+
+    ax.set_xticks(x)
+    ax.set_xticklabels(subj_labels)
+    ax.set_xlabel("Subject Area (IRT Theta)")
+    ax.set_ylabel("Mean IRT Theta Score")
+    ax.set_title("External Validity: Cluster Profiles on IRT Theta (S1–S5)",
+                 fontweight="bold", fontsize=11)
+    ax.legend(title="Cluster", loc="best", fontsize=8, title_fontsize=9,
+              framealpha=0.95, edgecolor="gray")
+    ax.grid(alpha=0.3)
+    ax.set_axisbelow(True)
+
+    fig.tight_layout()
+    out = FIGS_DIR / "fig12_theta_line_chart_s1_s5.png"
+    fig.savefig(out, dpi=300)
+    plt.close(fig)
+    print(f"  {out.name}")
+
+
+# ══════════════════════════════════════════════════════════════════════════
 # MAIN
 # ══════════════════════════════════════════════════════════════════════════
 
@@ -976,6 +1028,7 @@ def main():
     plot_anova_confound(data)
     plot_predictive_validity(data)
     plot_representational_validity(data)
+    plot_theta_line_chart_s1_s5()
 
     print(f"\nAll figures saved to: {FIGS_DIR}")
     for f in sorted(FIGS_DIR.glob("fig*.png")):

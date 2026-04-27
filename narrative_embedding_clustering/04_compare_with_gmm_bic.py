@@ -58,6 +58,18 @@ def _save_zmean_heatmap(df: pd.DataFrame, cluster_col: str, value_cols: list, ou
     # Order clusters by overall z-mean (row mean) so high-performing clusters
     # appear on top, moderate in the middle, low-performing at the bottom.
     mat = mat.loc[mat.mean(axis=1).sort_values(ascending=False).index]
+    # Relabel columns for consecutive subject numbering (S5→S4, S6→S5)
+    col_remap = {}
+    for c in mat.columns:
+        m = re.search(r"(\D*)(\d+)(.*)", c, re.IGNORECASE)
+        if m:
+            prefix, num, suffix = m.group(1), int(m.group(2)), m.group(3)
+            if num == 5:
+                col_remap[c] = f"{prefix}4{suffix}" if suffix else "S4"
+            elif num == 6:
+                col_remap[c] = f"{prefix}5{suffix}" if suffix else "S5"
+    if col_remap:
+        mat = mat.rename(columns=col_remap)
     vmax = 2.0
     vmin = -2.0
     n_rows, n_cols = mat.shape

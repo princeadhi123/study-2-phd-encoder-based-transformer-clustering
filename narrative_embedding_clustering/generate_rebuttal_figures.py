@@ -802,10 +802,10 @@ def plot_anova_confound(data):
         ax.text(bar.get_x() + bar.get_width() / 2, h,
                 f"{h:.3f}", ha="center", va="bottom", fontsize=9)
 
-    ax.axhline(0.14, color="#FFA726", linestyle=":", linewidth=1.2, alpha=0.8)
-    ax.text(len(subjects) - 0.5, 0.145, "Large (0.14)", fontsize=7, color="#E65100", ha="right")
-    ax.axhline(0.06, color="#BDBDBD", linestyle=":", linewidth=1)
-    ax.text(len(subjects) - 0.5, 0.065, "Medium (0.06)", fontsize=7, color="#757575", ha="right")
+    ax.axhline(0.14, color="#C62828", linestyle="--", linewidth=1.2, alpha=0.7)
+    ax.text(-0.4, 0.14, "Large (0.14)", fontsize=7.5, color="#C62828", ha="left", va="bottom", fontweight="bold")
+    ax.axhline(0.06, color="#37474F", linestyle="--", linewidth=1.0, alpha=0.7)
+    ax.text(-0.4, 0.06, "Medium (0.06)", fontsize=7.5, color="#37474F", ha="left", va="bottom", fontweight="bold")
 
     ax.set_xticks(x)
     ax.set_xticklabels(subjects)

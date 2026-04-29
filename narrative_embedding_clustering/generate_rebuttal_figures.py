@@ -923,8 +923,8 @@ def plot_representational_validity(data):
     ax.set_yticks(range(len(rf)))
     ax.set_yticklabels(rf["Feature"], fontsize=9)
     ax.set_xlabel("|Spearman ρ| (Embedding Distance ↔ Feature Distance)")
-    ax.set_title("Representational Validity: Do Embeddings Encode Behavioral Features?",
-                 fontweight="bold")
+    ax.set_title("Representational Validity (Strategy C + MiniLM): Do Embeddings Encode Behavioral Features?",
+                 fontweight="bold", loc="center")
     ax.set_xlim(0, 0.8)
     ax.grid(axis="x", alpha=0.3)
 
@@ -934,13 +934,7 @@ def plot_representational_validity(data):
     ax.axvline(0.5, color="#E53935", linestyle=":", linewidth=1.2, alpha=0.8)
     ax.text(0.505, len(rf) - 0.5, "Strong", fontsize=7, color="#C62828")
 
-    # Legend
-    from matplotlib.patches import Patch
-    legend_elements = [
-        Patch(facecolor=C_MINILM, alpha=0.85, label="In Narrative Text"),
-        Patch(facecolor=C_NUMERIC, alpha=0.85, label="Not in Narrative"),
-    ]
-    ax.legend(handles=legend_elements, loc="lower right", fontsize=9)
+    # No legend needed — all features shown are in the narrative text
 
     # Overall correlation annotation
     repr_summary = pd.read_csv(RESULTS_DIR / "representational_validity_summary.csv")

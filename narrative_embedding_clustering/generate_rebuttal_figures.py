@@ -522,7 +522,7 @@ def plot_cohens_d_heatmap(data):
 
 
 # ══════════════════════════════════════════════════════════════════════════
-# FIGURE 6: Cluster Grade Profiles
+# FIGURE 6: Cluster Score Profiles
 # ══════════════════════════════════════════════════════════════════════════
 
 
@@ -546,7 +546,7 @@ def plot_cluster_profiles(data):
 
     ax.set_xlabel("Subject Area")
     ax.set_ylabel(f"Narrative Cluster (K={BEST_NAR_K})")
-    ax.set_title("Cluster-Mean Grade Profiles\n(Cell = raw mean, Colour = z-score)",
+    ax.set_title("Cluster-Mean Score Profiles\n(Cell = raw mean, Colour = z-score)",
                  fontweight="bold")
     ax.set_xticklabels(subj_cols, rotation=0)
     ax.set_yticklabels([str(int(c)) for c in prof.index], rotation=0)
@@ -811,7 +811,7 @@ def plot_anova_confound(data):
     ax.set_xticklabels(subjects)
     ax.set_xlabel("Subject Area")
     ax.set_ylabel("η² (Effect Size)")
-    ax.set_title("Within-Subject Effect Size\n(Clusters → Grades, per Subject)", fontweight="bold")
+    ax.set_title("Within-Subject Effect Size\n(Clusters → Scores, per Subject)", fontweight="bold")
     ax.set_ylim(0, max(anova["Eta_squared"]) * 1.2)
     ax.grid(axis="y", alpha=0.3)
 

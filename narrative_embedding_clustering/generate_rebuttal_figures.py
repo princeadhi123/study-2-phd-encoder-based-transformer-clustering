@@ -837,7 +837,7 @@ def plot_predictive_validity(data):
     # Panel 1: Grouped bar by condition and subject
     ax = axes[0]
     conditions = ["Narrative_Clusters", "Numeric_Clusters", "Raw_Features"]
-    cond_labels = ["Narrative\nClusters", "Numeric\nClusters", "Raw\nFeatures"]
+    cond_labels = ["Strategy C\n+ MiniLM", "Numeric\nClusters", "Raw\nFeatures"]
     cond_colors = [C_MINILM, C_NUMERIC, "#4CAF50"]
 
     subjects = sorted(cv["Subject"].unique())
@@ -856,7 +856,7 @@ def plot_predictive_validity(data):
     ax.set_xticklabels(subjects)
     ax.set_xlabel("Subject Area")
     ax.set_ylabel("R² (5-Fold CV)")
-    ax.set_title("Predictive Validity: Cluster Membership → Grade Prediction", fontweight="bold")
+    ax.set_title("Predictive Validity: Cluster Membership → Score Prediction", fontweight="bold")
     ax.legend(loc="upper right", fontsize=8)
     ax.set_ylim(0, 1.0)
     ax.grid(axis="y", alpha=0.3)
@@ -865,8 +865,8 @@ def plot_predictive_validity(data):
     ax = axes[1]
     all_conditions = ["Raw_Features", "Nar_Clusters+Raw", "Num_Clusters+Raw",
                       "Numeric_Clusters", "Narrative_Clusters"]
-    all_labels = ["Raw Features", "Narrative +\nRaw", "Numeric +\nRaw",
-                  "Numeric\nClusters", "Narrative\nClusters"]
+    all_labels = ["Raw Features", "Strategy C +\nMiniLM + Raw", "Numeric +\nRaw",
+                  "Numeric\nClusters", "Strategy C\n+ MiniLM"]
     all_colors = ["#4CAF50", "#1565C0", "#616161", C_NUMERIC, C_MINILM]
 
     mean_r2 = []
@@ -886,7 +886,7 @@ def plot_predictive_validity(data):
     ax.set_xlim(0, max(mean_r2) * 1.15)
     ax.grid(axis="x", alpha=0.3)
 
-    fig.suptitle("External Predictive Validity: 5-Fold Cross-Validation Grade Prediction",
+    fig.suptitle("External Predictive Validity: 5-Fold Cross-Validation Score Prediction",
                  fontsize=12, fontweight="bold", y=1.02)
     fig.tight_layout()
     out = FIGS_DIR / "fig10_predictive_validity.png"

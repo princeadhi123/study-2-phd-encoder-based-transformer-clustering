@@ -1,0 +1,102 @@
+Methods: External Predictive Validity (5-Fold Cross-Validation Score Prediction)
+
+1.  Purpose
+    The purpose of this analysis is to assess whether cluster membership derived from 
+    student behaviour narratives has independent predictive power for academic outcomes 
+    (subject scores), above and beyond raw behavioural features. This constitutes an 
+    external predictive validity check: the target variable (subject scores) was never 
+    used during cluster construction.
+
+2.  Data Sources
+    Three datasets were merged by student ID (IDCode):
+    (a) Narrative cluster labels — derived from Strategy C + all-MiniLM-L6-v2 
+        embeddings, GMM (AICc best, K=8, tied covariance).
+    (b) Numeric cluster labels — derived from the same 8 engineered behavioural 
+        features using GMM (AICc best, K=5, full covariance), ensuring a fair 
+        apples-to-apples comparison with the narrative pipeline.
+    (c) Raw behavioural features — 8 engineered variables: n_items, accuracy, 
+        avg_rt, var_rt, rt_cv, longest_correct_streak, longest_incorrect_streak, 
+        consecutive_correct_rate. These are the same 8 variables used to generate 
+        the narrative text templates.
+    (d) Target variable — actual subject scores (S1, S2, S3, S4, S5), loaded from 
+        marks_with_clusters.csv. These scores were excluded from all clustering 
+        procedures.
+
+3.  Feature Preparation
+    For each student, two representations were prepared:
+    (a) Cluster membership was one-hot encoded. Because cluster labels are categorical, 
+        dummy variables were created for each cluster (e.g., nar_cl_0, nar_cl_1, ..., 
+        nar_cl_7 for narrative clusters; num_cl_0, ..., num_cl_4 for numeric clusters). 
+        This prevents the model from falsely interpreting cluster IDs as ordered 
+        continuous values.
+    (b) Raw behavioural features were used as an 8-dimensional numeric vector.
+    (c) Combined conditions were created by horizontal stacking (column-wise 
+        concatenation): cluster dummies plus raw features.
+
+    Five predictor conditions were evaluated:
+    i.   Narrative Clusters alone — 8 binary dummy columns (Strategy C + MiniLM).
+    ii.  Numeric Clusters alone — 5 binary dummy columns.
+    iii. Raw Features alone — 8 continuous columns.
+    iv.  Narrative Clusters + Raw Features — 16 columns (8 dummies + 8 features).
+    v.   Numeric Clusters + Raw Features — 13 columns (5 dummies + 8 features).
+
+4.  Modelling Approach
+    A Random Forest Regressor (n_estimators=100, random_state=42, n_jobs=-1) was 
+    chosen for its ability to capture non-linear relationships and handle mixed 
+    categorical/continuous inputs without scaling. All hyperparameters were held 
+    constant across conditions to ensure fair comparison.
+
+5.  Cross-Validation Procedure
+    For each subject (S1–S5) and each of the five conditions, a 5-fold stratified 
+    cross-validation was performed independently:
+
+    Step 1 — Target extraction: 
+        The subject scores for all 537 students were extracted. Students with 
+        missing scores were excluded (retaining ~530 students per subject).
+
+    Step 2 — Stratification: 
+        Students were binned into five quantiles (quintiles) based on their subject 
+        score distribution using pd.qcut(q=5). Bin 0 = lowest 20% performers; 
+        Bin 4 = highest 20% performers. These quintiles served as stratification 
+        groups to ensure balanced representation of low, medium, and high performers 
+        in every fold. Importantly, quintile boundaries were computed independently 
+        for each subject because score ranges differ across subjects.
+
+    Step 3 — Fold construction: 
+        StratifiedKFold (n_splits=5, shuffle=True, random_state=42) assigned 
+        students to folds such that each fold contained approximately equal numbers 
+        of students from each quintile (~21 students from each of the 5 bins per fold).
+
+    Step 4 — Training and prediction: 
+        For each fold k (k = 1...5):
+            - Train Random Forest on the union of the other 4 folds (~430 students).
+            - Predict scores for the held-out fold k (~107 students).
+        After all 5 folds, every student had exactly one predicted score, generated 
+        by a model that never saw that student during training.
+
+    Step 5 — Evaluation: 
+        R² (coefficient of determination), Mean Absolute Error (MAE), and Pearson 
+        correlation (r) were computed between the 537 actual scores and 537 
+        cross-validated predictions.
+
+    This entire procedure was repeated 25 times: 5 subjects × 5 conditions, each 
+    with independent model training.
+
+6.  Figure Construction
+    Panel A (Left): 
+        Grouped bar chart showing R² per subject (S1–S5) for three primary conditions: 
+        Narrative Clusters, Numeric Clusters, and Raw Features. This reveals which 
+        predictor type performs best within each subject area.
+
+    Panel B (Right): 
+        Horizontal bar chart showing mean R² across all five subjects for each of 
+        the five conditions. For each condition, the five subject-specific R² values 
+        were averaged: Mean R² = (R²_S1 + R²_S2 + R²_S3 + R²_S4 + R²_S5) / 5.
+
+7.  Interpretation of Combined Conditions
+    If cluster membership carries genuinely new information beyond raw features, 
+    adding clusters to raw features (conditions iv and v) should yield substantially 
+    higher R² than raw features alone (condition iii). Conversely, if clusters merely 
+    repackage the same behavioural information, R² should remain unchanged — confirming 
+    that the narrative clusters are honest summaries of behaviour rather than 
+    artefactual constructs.

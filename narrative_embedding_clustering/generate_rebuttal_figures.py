@@ -792,6 +792,10 @@ def plot_anova_confound(data):
     ax.set_xlabel("Subject Area")
     ax.set_ylabel("Kruskal-Wallis H")
     ax.set_title("Within-Subject H-Statistic\n(All p < 0.001)", fontweight="bold")
+    # Critical threshold: H ~ χ²(7), p<0.001 ≈ 24.3 (K=8 clusters)
+    ax.axhline(24.3, color="#212121", linestyle="--", linewidth=1.2, alpha=0.7)
+    ax.text(len(subjects) - 0.5, 30, "p<0.001 (24.3)", fontsize=8.5, color="#212121",
+            ha="right", va="bottom", fontweight="bold")
     ax.grid(axis="y", alpha=0.3)
 
     # Panel 2: Eta-squared bars with benchmarks
@@ -802,10 +806,10 @@ def plot_anova_confound(data):
         ax.text(bar.get_x() + bar.get_width() / 2, h,
                 f"{h:.3f}", ha="center", va="bottom", fontsize=9)
 
-    ax.axhline(0.14, color="#C62828", linestyle="--", linewidth=1.2, alpha=0.7)
-    ax.text(-0.4, 0.14, "Large (0.14)", fontsize=7.5, color="#C62828", ha="left", va="bottom", fontweight="bold")
-    ax.axhline(0.06, color="#37474F", linestyle="--", linewidth=1.0, alpha=0.7)
-    ax.text(-0.4, 0.06, "Medium (0.06)", fontsize=7.5, color="#37474F", ha="left", va="bottom", fontweight="bold")
+    ax.axhline(0.14, color="#1A237E", linestyle="--", linewidth=1.2, alpha=0.7)
+    ax.text(-0.4, 0.14, "Large (0.14)", fontsize=8.5, color="#1A237E", ha="left", va="bottom", fontweight="bold")
+    ax.axhline(0.06, color="#263238", linestyle="--", linewidth=1.0, alpha=0.7)
+    ax.text(-0.4, 0.06, "Medium (0.06)", fontsize=8.5, color="#263238", ha="left", va="bottom", fontweight="bold")
 
     ax.set_xticks(x)
     ax.set_xticklabels(subjects)

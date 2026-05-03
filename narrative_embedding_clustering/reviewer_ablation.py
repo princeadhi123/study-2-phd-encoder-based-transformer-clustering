@@ -36,7 +36,7 @@ from sklearn.model_selection import StratifiedKFold, cross_val_predict
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import StandardScaler
 from scipy.spatial.distance import pdist
-from scipy.stats import f as f_dist, spearmanr, pearsonr, kruskal
+from scipy.stats import f as f_dist, spearmanr, pearsonr, kruskal, chi2
 
 warnings.filterwarnings("ignore")
 
@@ -653,7 +653,15 @@ def run_anova_confound_check():
     )
 
     results = []
-    print(f"\nKruskal-Wallis H-test: narrative clusters → grades (per subject)")
+    # Determine critical threshold: H follows χ²(k-1) under null hypothesis.
+    # For K=8 clusters, df=7. At α=0.001, the critical value is ~24.3.
+    # Any H > 24.3 means p < 0.001 (groups are not randomly distributed).
+    k_expected = len(merged["narrative_gmm_aicc_best_label"].unique())
+    h_critical_001 = chi2.ppf(0.999, df=k_expected - 1)
+    h_critical_05  = chi2.ppf(0.95,  df=k_expected - 1)
+    print(f"\nKruskal-Wallis H-test: narrative clusters → scores (per subject)")
+    print(f"H-critical (p<0.001, df={k_expected-1}) = {h_critical_001:.1f}")
+    print(f"H-critical (p<0.05,  df={k_expected-1}) = {h_critical_05:.1f}")
     print(f"{'Subject':<10} {'H-statistic':>12} {'p-value':>12} {'Significant':>12} {'η²':>8}")
     print("-" * 58)
 

@@ -778,6 +778,8 @@ def plot_anova_confound(data):
     fig, axes = plt.subplots(1, 2, figsize=(12, 4.5))
 
     subjects = anova["Subject"].tolist()
+    # Remap to sequential S1..S5 for figure display (S5->S4, S6->S5)
+    display_labels = [f"S{i+1}" for i in range(len(subjects))]
     x = np.arange(len(subjects))
 
     # Panel 1: H-statistic bars with significance stars
@@ -788,7 +790,7 @@ def plot_anova_confound(data):
         ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height(),
                 f"{bar.get_height():.0f}\n{stars}", ha="center", va="bottom", fontsize=8)
     ax.set_xticks(x)
-    ax.set_xticklabels(subjects)
+    ax.set_xticklabels(display_labels)
     ax.set_xlabel("Subject Area")
     ax.set_ylabel("Kruskal-Wallis H")
     ax.set_title("Within-Subject H-Statistic\n(All p < 0.001)", fontweight="bold")
@@ -812,7 +814,7 @@ def plot_anova_confound(data):
     ax.text(-0.4, 0.06, "Medium (0.06)", fontsize=8.5, color="#263238", ha="left", va="bottom", fontweight="bold")
 
     ax.set_xticks(x)
-    ax.set_xticklabels(subjects)
+    ax.set_xticklabels(display_labels)
     ax.set_xlabel("Subject Area")
     ax.set_ylabel("η² (Effect Size)")
     ax.set_title("Within-Subject Effect Size\n(Clusters → Scores, per Subject)", fontweight="bold")

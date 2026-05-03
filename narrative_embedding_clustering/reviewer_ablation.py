@@ -674,7 +674,13 @@ def run_anova_confound_check():
         h_stat, p_val = kruskal(*groups)
         n = sum(len(g) for g in groups)
         k = len(groups)
-        eta2 = max(0, (h_stat - k + 1) / (n - k))
+
+        # Parametric eta² = SS_between / SS_total (consistent with model comparison)
+        all_vals = np.concatenate(groups)
+        grand_mean = all_vals.mean()
+        ss_between = sum(len(g) * (g.mean() - grand_mean) ** 2 for g in groups)
+        ss_total = ((all_vals - grand_mean) ** 2).sum()
+        eta2 = ss_between / ss_total if ss_total > 0 else 0.0
 
         sig = "YES" if p_val < 0.001 else ("yes" if p_val < 0.05 else "no")
         print(f"{subj:<10} {h_stat:>12.2f} {p_val:>12.2e} {sig:>12} {eta2:>8.4f}")

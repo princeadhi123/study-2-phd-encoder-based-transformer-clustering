@@ -187,11 +187,19 @@ def _build_categories(features_df: pd.DataFrame) -> pd.DataFrame:
     return feats[["IDCode", "acc_cat", "speed_cat", "timing_cat", "streak_correct_cat", "streak_incorrect_cat"]]
 
 
-def save_cluster_keywords(df: pd.DataFrame, cluster_col: str) -> None:
+def save_cluster_keywords(df: pd.DataFrame, cluster_col: str,
+                           raw_features_df: pd.DataFrame | None = None,
+                           marks_df: pd.DataFrame | None = None) -> None:
     """Generate cluster keyword report from pre-computed categorical labels.
 
     Expected columns on df: acc_cat, speed_cat, timing_cat,
     streak_correct_cat, streak_incorrect_cat plus the cluster column.
+
+    Optional raw_features_df (must contain IDCode + avg_rt) and marks_df
+    (must contain IDCode + subject score columns S1..S6) are used to append
+    per-cluster academic context annotations — response time and marks tier —
+    after each FINAL KEYWORD entry.  These annotations are descriptive only
+    and do not influence keyword selection.
 
     This function is template-independent — results depend only on the
     categorised numeric features, not on the narrative phrasing, so the
@@ -199,6 +207,34 @@ def save_cluster_keywords(df: pd.DataFrame, cluster_col: str) -> None:
     (they describe the same 537 students in different words)."""
     clusters = sorted(df[cluster_col].unique())
     _GAP_THRESHOLD = 0.15
+
+    # Pre-compute per-cluster academic context if external data provided
+    cluster_rt: dict = {}
+    cluster_marks: dict = {}
+
+    if raw_features_df is not None and "IDCode" in df.columns and "avg_rt" in raw_features_df.columns:
+        rt_merged = df[["IDCode", cluster_col]].merge(
+            raw_features_df[["IDCode", "avg_rt"]], on="IDCode", how="left"
+        )
+        for _c, _grp in rt_merged.groupby(cluster_col):
+            cluster_rt[_c] = float(_grp["avg_rt"].median())
+
+    if marks_df is not None and "IDCode" in df.columns:
+        _id_col = _detect_id_col(marks_df)
+        _subj_cols = _detect_subject_cols(marks_df)
+        if _subj_cols:
+            _marks = marks_df.rename(columns={_id_col: "IDCode"}) if _id_col != "IDCode" else marks_df
+            m_merged = df[["IDCode", cluster_col]].merge(
+                _marks[["IDCode"] + _subj_cols], on="IDCode", how="left"
+            )
+            _s2_col = next((c for c in _subj_cols if c.upper() == "S2"), _subj_cols[0])
+            _all_s2 = m_merged[_s2_col].dropna()
+            _s2_p33, _s2_p67 = float(_all_s2.quantile(0.33)), float(_all_s2.quantile(0.67))
+            for _c, _grp in m_merged.groupby(cluster_col):
+                _overall = float(_grp[_subj_cols].mean().mean())
+                _s2_mean = float(_grp[_s2_col].mean())
+                _tier = "HIGH" if _s2_mean >= _s2_p67 else ("LOW" if _s2_mean <= _s2_p33 else "MEDIUM")
+                cluster_marks[_c] = (_overall, _tier, _s2_mean)
 
     def _counts(series: pd.Series, levels: list[str]) -> dict[str, int]:
         vc = series.value_counts().to_dict()
@@ -311,8 +347,8 @@ def save_cluster_keywords(df: pd.DataFrame, cluster_col: str) -> None:
 
         cor_sig_n = cor["moderate"] + cor["long"]
         inc_sig_n = inc["moderate"] + inc["long"]
-        cor_sig_label = "long correct streak" if cor["long"] >= cor["moderate"] else "moderate correct streak"
-        inc_sig_label = "long incorrect streak" if inc["long"] >= inc["moderate"] else "moderate incorrect streak"
+        cor_sig_label = "long correct streak" if cor["long"] > cor["short"] + cor["moderate"] else "moderate correct streak"
+        inc_sig_label = "long incorrect streak" if inc["long"] > inc["short"] + inc["moderate"] else "moderate incorrect streak"
         cor_sig_count = max(cor["moderate"], cor["long"])
         inc_sig_count = max(inc["moderate"], inc["long"])
 
@@ -361,9 +397,18 @@ def save_cluster_keywords(df: pd.DataFrame, cluster_col: str) -> None:
 
         # ── Final keyword string ──────────────────────────────────────────────
         keywords_str = ", ".join(cluster_parts)
-        rows.append({"Cluster": cluster_label, "Keywords": keywords_str})
+        annotation_parts = []
+        if cluster_label in cluster_marks:
+            _overall, _tier, _s2_mean = cluster_marks[cluster_label]
+            annotation_parts.append(f"Marks: {_tier} tier | overall mean = {_overall:.2f} (S2 = {_s2_mean:.1f})")
+        if cluster_label in cluster_rt:
+            annotation_parts.append(f"Median RT = {cluster_rt[cluster_label]:.1f}s")
+        annotation_str = " | ".join(annotation_parts)
+        rows.append({"Cluster": cluster_label, "Keywords": keywords_str, "AcademicContext": annotation_str})
         cluster_report.append("")
         cluster_report.append(f"  ★ FINAL KEYWORD: \"{keywords_str}\"")
+        if annotation_str:
+            cluster_report.append(f"  → Academic context: {annotation_str}")
         cluster_report.append("")
 
         report_lines.extend(cluster_report)
@@ -374,10 +419,13 @@ def save_cluster_keywords(df: pd.DataFrame, cluster_col: str) -> None:
     report_lines.append("FINAL KEYWORD SUMMARY TABLE")
     report_lines.append("=" * 72)
     report_lines.append("")
+    _has_context = any(row.get("AcademicContext") for row in rows)
     report_lines.append(f"{'Cluster':<10} {'Keywords'}")
     report_lines.append("-" * 72)
     for row in rows:
         report_lines.append(f"{int(row['Cluster']):<10} {row['Keywords']}")
+        if _has_context and row.get("AcademicContext"):
+            report_lines.append(f"{'':10} → {row['AcademicContext']}")
     report_lines.append("=" * 72)
 
     report_path = OUTPUT_DIR / make_versioned_filename("cluster_keywords_report.txt")
@@ -413,7 +461,9 @@ def main() -> None:
         derived = pd.read_csv(DERIVED_FEATURES_PATH)
         cats = _build_categories(derived)
         base_with_cats = base.merge(cats, on="IDCode", how="left")
-        save_cluster_keywords(base_with_cats, "narrative_best_label")
+        marks_data = pd.read_csv(MARKS_WITH_CLUSTERS_PATH) if MARKS_WITH_CLUSTERS_PATH.exists() else None
+        save_cluster_keywords(base_with_cats, "narrative_best_label",
+                               raw_features_df=derived, marks_df=marks_data)
     else:
         print(f"[warn] Derived features not found at {DERIVED_FEATURES_PATH}; skipping keyword extraction.")
 

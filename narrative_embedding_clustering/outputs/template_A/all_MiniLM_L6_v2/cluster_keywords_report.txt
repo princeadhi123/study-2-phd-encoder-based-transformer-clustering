@@ -30,6 +30,7 @@ CLUSTER 0  (n=47 students)
   → SELECTED: 'long correct streak'  [Reason: correct streak is significant (moderate+long = 97.9% beats short 2.1%); incorrect streaks are mostly short (63.8% vs 36.2% moderate+long)]
 
   ★ FINAL KEYWORD: "With medium accuracy, responses are moderate, mixed timing variability, long correct streak"
+  → Academic context: Marks: HIGH tier | overall mean = 11.13 (S2 = 29.6) | Median RT = 16.7s
 
 CLUSTER 1  (n=90 students)
 --------------------------------------------------
@@ -58,6 +59,7 @@ CLUSTER 1  (n=90 students)
   → SELECTED: 'long incorrect streak'  [Reason: incorrect streak is significant (moderate+long = 100.0% beats short 0.0%); correct streaks are mostly short (90.0% vs 10.0% moderate+long)]
 
   ★ FINAL KEYWORD: "With low accuracy, responses are mixed speed, mixed timing variability, long incorrect streak"
+  → Academic context: Marks: LOW tier | overall mean = 5.96 (S2 = 15.6) | Median RT = 19.8s
 
 CLUSTER 2  (n=85 students)
 --------------------------------------------------
@@ -83,9 +85,10 @@ CLUSTER 2  (n=85 students)
     short incorrect streak                  :  21  (24.7%)
     moderate incorrect streak               :  23  (27.1%)
     long incorrect streak                   :  41  (48.2%)
-  → SELECTED: 'long incorrect streak'  [Reason: both streaks significant — incorrect wins by combined count (incorrect moderate+long = 64 vs correct moderate+long = 52)]
+  → SELECTED: 'moderate incorrect streak'  [Reason: both streaks significant — incorrect wins by combined count (incorrect moderate+long = 64 vs correct moderate+long = 52)]
 
-  ★ FINAL KEYWORD: "With medium accuracy, responses are slow, highly variable in timing, long incorrect streak"
+  ★ FINAL KEYWORD: "With medium accuracy, responses are slow, highly variable in timing, moderate incorrect streak"
+  → Academic context: Marks: MEDIUM tier | overall mean = 9.49 (S2 = 25.5) | Median RT = 22.4s
 
 CLUSTER 3  (n=57 students)
 --------------------------------------------------
@@ -114,6 +117,7 @@ CLUSTER 3  (n=57 students)
   → SELECTED: 'long correct streak'  [Reason: correct streak is significant (moderate+long = 100.0% beats short 0.0%); incorrect streaks are mostly short (96.5% vs 3.5% moderate+long)]
 
   ★ FINAL KEYWORD: "With high accuracy, responses are fast, mixed timing variability, long correct streak"
+  → Academic context: Marks: HIGH tier | overall mean = 12.53 (S2 = 32.3) | Median RT = 13.5s
 
 CLUSTER 4  (n=45 students)
 --------------------------------------------------
@@ -142,6 +146,7 @@ CLUSTER 4  (n=45 students)
   → SELECTED: 'long correct streak'  [Reason: correct streak is significant (moderate+long = 95.6% beats short 4.4%); incorrect streaks are mostly short (77.8% vs 22.2% moderate+long)]
 
   ★ FINAL KEYWORD: "With medium-to-high accuracy, responses are slow, highly variable in timing, long correct streak"
+  → Academic context: Marks: HIGH tier | overall mean = 11.42 (S2 = 30.3) | Median RT = 22.9s
 
 CLUSTER 5  (n=39 students)
 --------------------------------------------------
@@ -170,6 +175,7 @@ CLUSTER 5  (n=39 students)
   → SELECTED: 'long incorrect streak'  [Reason: incorrect streak is significant (moderate+long = 100.0% beats short 0.0%); correct streaks are mostly short (69.2% vs 30.8% moderate+long)]
 
   ★ FINAL KEYWORD: "With low accuracy, responses are moderate, mixed timing variability, long incorrect streak"
+  → Academic context: Marks: LOW tier | overall mean = 6.59 (S2 = 17.7) | Median RT = 17.1s
 
 CLUSTER 6  (n=100 students)
 --------------------------------------------------
@@ -198,6 +204,7 @@ CLUSTER 6  (n=100 students)
   → SELECTED: 'moderate correct streak'  [Reason: correct streak is significant (moderate+long = 86.0% beats short 14.0%); incorrect streaks are mostly short (53.0% vs 47.0% moderate+long)]
 
   ★ FINAL KEYWORD: "With medium accuracy, responses are fast, stable in timing, moderate correct streak"
+  → Academic context: Marks: MEDIUM tier | overall mean = 10.36 (S2 = 28.1) | Median RT = 13.1s
 
 CLUSTER 7  (n=74 students)
 --------------------------------------------------
@@ -226,6 +233,7 @@ CLUSTER 7  (n=74 students)
   → SELECTED: 'moderate correct streak'  [Reason: both streaks significant — correct wins by combined count (correct moderate+long = 51 vs incorrect moderate+long = 50)]
 
   ★ FINAL KEYWORD: "With medium accuracy, responses are moderate, moderately variable in timing, moderate correct streak"
+  → Academic context: Marks: MEDIUM tier | overall mean = 9.68 (S2 = 26.3) | Median RT = 16.9s
 
 
 ========================================================================
@@ -235,11 +243,19 @@ FINAL KEYWORD SUMMARY TABLE
 Cluster    Keywords
 ------------------------------------------------------------------------
 0          With medium accuracy, responses are moderate, mixed timing variability, long correct streak
+           → Marks: HIGH tier | overall mean = 11.13 (S2 = 29.6) | Median RT = 16.7s
 1          With low accuracy, responses are mixed speed, mixed timing variability, long incorrect streak
-2          With medium accuracy, responses are slow, highly variable in timing, long incorrect streak
+           → Marks: LOW tier | overall mean = 5.96 (S2 = 15.6) | Median RT = 19.8s
+2          With medium accuracy, responses are slow, highly variable in timing, moderate incorrect streak
+           → Marks: MEDIUM tier | overall mean = 9.49 (S2 = 25.5) | Median RT = 22.4s
 3          With high accuracy, responses are fast, mixed timing variability, long correct streak
+           → Marks: HIGH tier | overall mean = 12.53 (S2 = 32.3) | Median RT = 13.5s
 4          With medium-to-high accuracy, responses are slow, highly variable in timing, long correct streak
+           → Marks: HIGH tier | overall mean = 11.42 (S2 = 30.3) | Median RT = 22.9s
 5          With low accuracy, responses are moderate, mixed timing variability, long incorrect streak
+           → Marks: LOW tier | overall mean = 6.59 (S2 = 17.7) | Median RT = 17.1s
 6          With medium accuracy, responses are fast, stable in timing, moderate correct streak
+           → Marks: MEDIUM tier | overall mean = 10.36 (S2 = 28.1) | Median RT = 13.1s
 7          With medium accuracy, responses are moderate, moderately variable in timing, moderate correct streak
+           → Marks: MEDIUM tier | overall mean = 9.68 (S2 = 26.3) | Median RT = 16.9s
 ========================================================================

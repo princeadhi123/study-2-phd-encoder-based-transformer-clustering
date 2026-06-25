@@ -586,7 +586,7 @@ def plot_weight_sensitivity(data):
 
     pivot = winners.pivot_table(index="w_Eta", columns="w_Internal",
                                  values="code", aggfunc="first")
-    pivot = pivot.sort_index(ascending=False)
+    pivot = pivot.sort_index(ascending=True)
 
     # Distinct, high-contrast palette (one colour per winning Strategy+Model).
     color_map = {
@@ -606,6 +606,7 @@ def plot_weight_sensitivity(data):
 
     sns.heatmap(pivot, ax=ax, cmap=cmap, norm=norm,
                 linewidths=0.5, linecolor="white", cbar=False, annot=False)
+    ax.invert_yaxis()
 
     for i, eta in enumerate(pivot.index):
         for j, internal in enumerate(pivot.columns):
@@ -618,8 +619,8 @@ def plot_weight_sensitivity(data):
 
     ax.set_xlabel("w_Internal")
     ax.set_ylabel("w_Eta")
-    ax.set_title("Weight Sensitivity of Composite Winner  "
-                 "(cell text = w_ARI)",
+    ax.set_title("Weight Sensitivity of Composite Winner\n"
+                 r"(cell values = implied $w_{ARI}$ = 1 $-$ $w_{Eta}$ $-$ $w_{Internal}$)",
                  fontweight="bold", fontsize=10)
 
     # Compact combined legend: colour patches + the ★ marker.

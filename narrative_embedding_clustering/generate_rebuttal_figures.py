@@ -822,7 +822,7 @@ def plot_anova_confound(data):
     ax.set_ylim(0, max(anova["Eta_squared"]) * 1.2)
     ax.grid(axis="y", alpha=0.3)
 
-    fig.suptitle("ANOVA Confound Check: Narrative Clusters Separate Students WITHIN Every Subject",
+    fig.suptitle("Kruskal-Wallis Confound Check: Narrative Clusters Separate Students WITHIN Every Subject",
                  fontsize=12, fontweight="bold", y=1.02)
     fig.tight_layout()
     out = FIGS_DIR / "fig9_anova_confound.png"
